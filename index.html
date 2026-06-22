@@ -2,34 +2,123 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bawa Library | Enterprise Management System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0a0a16">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Bawa Library">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Bawa%20Library%22%2C%22short_name%22%3A%22Bawa%20Lib%22%2C%22description%22%3A%22Library%20Seat%20Management%20System%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%230a0a16%22%2C%22theme_color%22%3A%22%23c9a84c%22%2C%22lang%22%3A%22en%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20512%20512'%253E%253Crect%20width%3D'512'%20height%3D'512'%20rx%3D'100'%20fill%3D'%25230a0a16'%2F%253E%253Crect%20width%3D'440'%20height%3D'440'%20x%3D'36'%20y%3D'36'%20rx%3D'80'%20fill%3D'%2523c9a84c'%2F%253E%253Ctext%20x%3D'256'%20y%3D'310'%20text-anchor%3D'middle'%20font-size%3D'220'%20font-family%3D'sans-serif'%253E%25F0%259F%2593%259A%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23c9a84c'/><text x='50' y='65' text-anchor='middle' font-size='48'>📚</text></svg>">
+
+    <title>Bawa Library</title>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                const swCode = `
+                    self.addEventListener('install', function(e) {
+                        self.skipWaiting();
+                    });
+                    self.addEventListener('activate', function(e) {
+                        e.waitUntil(clients.claim());
+                    });
+                    self.addEventListener('fetch', function(e) {
+                        e.respondWith(fetch(e.request).catch(function() {
+                            return new Response('Offline');
+                        }));
+                    });
+                `;
+                const blob = new Blob([swCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(swUrl)
+                    .then(function(reg) { console.log('SW registered'); })
+                    .catch(function(err) { console.log('SW failed', err); });
+            });
+        }
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --bg: #080810; --bg2: #111125; --gold: #c9a84c; --gold2: #f0d878;
+            --bg: #0a0a16; --bg2: #13132a; --gold: #c9a84c; --gold2: #f0d878;
             --green: #2ecc71; --red: #e74c3c; --orange: #f39c12; --blue: #5b9bd5;
             --purple: #8b5cf6; --text: #e8e6e1; --text2: #9a9588;
             --border: rgba(201,168,76,0.1); --radius: 18px; --radius-sm: 12px;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
         .light-theme {
             --bg: #faf8f0; --bg2: #ffffff; --text: #1a1a2e; --text2: #5a5540;
             --border: rgba(139,105,20,0.1);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
+        
+        html, body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg);
             background-image: 
                 radial-gradient(ellipse at 20% 10%, rgba(201,168,76,0.04) 0%, transparent 60%),
                 radial-gradient(ellipse at 80% 90%, rgba(139,92,246,0.03) 0%, transparent 60%);
-            min-height: 100vh; color: var(--text);
-            -webkit-font-smoothing: antialiased; transition: 0.3s;
+            min-height: 100vh; min-height: -webkit-fill-available;
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+            overscroll-behavior: none;
+            transition: 0.3s;
+            padding-bottom: var(--safe-bottom);
         }
 
-        /* ═══════════════ LOCK SCREEN ═══════════════ */
+        /* ═══════════ INSTALL BANNER ═══════════ */
+        .install-banner {
+            position: fixed; bottom: 20px; left: 15px; right: 15px;
+            background: linear-gradient(135deg, #1a1a35, #0f0f20);
+            border: 2px solid #c9a84c;
+            border-radius: 16px;
+            padding: 14px;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px rgba(201,168,76,0.2);
+            animation: slideUp 0.5s ease;
+            max-width: 450px;
+            margin: 0 auto;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(120px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .install-banner .banner-icon { font-size: 45px; flex-shrink: 0; }
+        .install-banner .banner-text { flex: 1; }
+        .install-banner .banner-text h4 { color: #c9a84c; font-size: 0.9rem; margin-bottom: 3px; }
+        .install-banner .banner-text p { color: #9a9588; font-size: 0.7rem; }
+        .install-banner .banner-btn {
+            background: #c9a84c; color: #000; border: none;
+            padding: 12px 20px; border-radius: 50px; font-weight: 800;
+            font-size: 0.8rem; cursor: pointer; white-space: nowrap;
+            font-family: 'Inter', sans-serif; flex-shrink: 0;
+            box-shadow: 0 5px 15px rgba(201,168,76,0.3);
+        }
+        .install-banner .banner-btn:active { transform: scale(0.95); }
+        .install-banner .banner-close {
+            position: absolute; top: 6px; right: 10px;
+            background: none; border: none; color: #9a9588;
+            font-size: 1.1rem; cursor: pointer; padding: 5px;
+        }
+
+        /* ═══════════ LOCK SCREEN ═══════════ */
         .lock-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; height: 100dvh;
             background: #080810;
             background-image: radial-gradient(ellipse at center, rgba(201,168,76,0.06) 0%, transparent 70%);
             z-index: 9999; display: flex; align-items: center; justify-content: center;
@@ -37,10 +126,7 @@
         }
         .lock-screen.hidden { opacity: 0; pointer-events: none; transform: scale(1.1); }
         
-        .logo-container {
-            position: relative;
-            width: 100px; height: 100px;
-        }
+        .logo-container { position: relative; width: 100px; height: 100px; }
         .logo-outer {
             width: 100px; height: 100px;
             background: linear-gradient(135deg, #c9a84c, #f0d878, #c9a84c, #8b6914);
@@ -49,46 +135,15 @@
             display: flex; align-items: center; justify-content: center;
             animation: logoRotate 4s ease-in-out infinite, logoGradient 6s ease infinite;
             box-shadow: 0 0 40px rgba(201,168,76,0.4), 0 0 80px rgba(201,168,76,0.2), 0 10px 30px rgba(0,0,0,0.5);
-            position: relative;
         }
         .logo-inner {
-            width: 70px; height: 70px;
-            background: #080810;
-            border-radius: 20px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 38px;
-            animation: logoFloat 3s ease-in-out infinite;
+            width: 70px; height: 70px; background: #080810;
+            border-radius: 20px; display: flex; align-items: center; justify-content: center;
+            font-size: 38px; animation: logoFloat 3s ease-in-out infinite;
         }
-        .logo-sparkle {
-            position: absolute;
-            width: 8px; height: 8px;
-            background: #fff;
-            border-radius: 50%;
-            animation: sparkle 2s ease-in-out infinite;
-        }
-        .logo-sparkle:nth-child(1) { top: 10px; left: 20px; animation-delay: 0s; }
-        .logo-sparkle:nth-child(2) { top: 15px; right: 15px; animation-delay: 0.5s; }
-        .logo-sparkle:nth-child(3) { bottom: 20px; left: 25px; animation-delay: 1s; }
-        .logo-sparkle:nth-child(4) { bottom: 10px; right: 20px; animation-delay: 1.5s; }
-
-        @keyframes logoRotate {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(3deg); }
-            75% { transform: rotate(-3deg); }
-        }
-        @keyframes logoGradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        @keyframes logoFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-4px); }
-        }
-        @keyframes sparkle {
-            0%, 100% { opacity: 0; transform: scale(0); }
-            50% { opacity: 1; transform: scale(1.5); }
-        }
+        @keyframes logoRotate { 0%,100%{transform:rotate(0)} 25%{transform:rotate(3deg)} 75%{transform:rotate(-3deg)} }
+        @keyframes logoGradient { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+        @keyframes logoFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
 
         .lock-name { 
             font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 900;
@@ -97,7 +152,7 @@
             animation: goldShift 4s ease infinite;
         }
         @keyframes goldShift { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
-        .lock-text { color: #9a9588; font-size: 0.82rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 500; }
+        .lock-text { color: #9a9588; font-size: 0.82rem; letter-spacing: 2px; text-transform: uppercase; }
         
         .pin-row { display: flex; gap: 10px; }
         .pin-dot {
@@ -107,15 +162,12 @@
             color: #e8e6e1; outline: none; caret-color: transparent;
             pointer-events: none; transition: 0.3s;
         }
-        .pin-dot.filled { border-color: #c9a84c; background: rgba(201,168,76,0.08); box-shadow: 0 0 15px rgba(201,168,76,0.15); }
-        .pin-dot.error { border-color: #e74c3c; background: rgba(231,76,60,0.1); animation: shake 0.5s; }
-        @keyframes shake {
-            0%,100%{transform:translateX(0)} 20%{transform:translateX(-7px)} 40%{transform:translateX(7px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)}
-        }
+        .pin-dot.filled { border-color: #c9a84c; background: rgba(201,168,76,0.08); }
+        .pin-dot.error { border-color: #e74c3c; animation: shake 0.5s; }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
         
         .pin-msg { font-size: 0.75rem; font-weight: 600; min-height: 24px; text-align: center; }
-        .pin-msg.info { color: #9a9588; }
-        .pin-msg.err { color: #e74c3c; }
+        .pin-msg.info { color: #9a9588; } .pin-msg.err { color: #e74c3c; }
         
         .numpad { display: grid; grid-template-columns: repeat(3, 62px); gap: 8px; }
         .numpad button {
@@ -125,161 +177,108 @@
             cursor: pointer; transition: 0.2s; font-family: 'Inter', sans-serif;
             display: flex; align-items: center; justify-content: center;
         }
-        .numpad button:hover { background: rgba(201,168,76,0.1); border-color: #c9a84c; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(201,168,76,0.15); }
+        .numpad button:hover { background: rgba(201,168,76,0.1); border-color: #c9a84c; }
         .numpad button:active { transform: scale(0.92); }
-        .numpad button.clear-btn { color: #e74c3c; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.5px; }
+        .numpad button.clear-btn { color: #e74c3c; font-size: 0.7rem; }
         .numpad button.del-btn { color: #f39c12; font-size: 1.2rem; }
-        .numpad button:disabled { opacity: 0.35; pointer-events: none; cursor: not-allowed; }
-        
-        .lock-footer { color: #9a9588; font-size: 0.6rem; opacity: 0.5; letter-spacing: 0.5px; }
+        .numpad button:disabled { opacity: 0.35; pointer-events: none; }
 
-        /* ═══════════════ MAIN APP ═══════════════ */
-        .main-app { transition: 0.4s; }
+        /* ═══════════ MAIN APP ═══════════ */
+        .main-app { transition: 0.4s; padding: 15px; max-width: 1250px; margin: 0 auto; }
         .main-app.blurred { filter: blur(10px); pointer-events: none; opacity: 0.12; }
-        .container { max-width: 1250px; margin: 0 auto; padding: 18px; }
         
         .header { text-align: center; margin-bottom: 22px; }
-        .header .h-logo {
-            width: 75px; height: 75px;
-            background: linear-gradient(135deg, #c9a84c, #f0d878, #c9a84c, #8b6914);
-            background-size: 300% 300%;
-            border-radius: 22px;
+        .h-logo {
+            width: 75px; height: 75px; background: linear-gradient(135deg, #c9a84c, #f0d878, #c9a84c, #8b6914);
+            background-size: 300% 300%; border-radius: 22px;
             display: inline-flex; align-items: center; justify-content: center;
-            font-size: 36px;
-            animation: logoGradient 6s ease infinite;
-            box-shadow: 0 0 30px rgba(201,168,76,0.3), 0 8px 20px rgba(0,0,0,0.4);
-            margin-bottom: 10px;
-            position: relative;
+            font-size: 36px; animation: logoGradient 6s ease infinite;
+            box-shadow: 0 0 30px rgba(201,168,76,0.3), 0 8px 20px rgba(0,0,0,0.4); margin-bottom: 10px;
         }
-        .header h1 { font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 900; }
-        .header .lib-name { 
-            background: linear-gradient(135deg, #c9a84c, #f0d878, #c9a84c); background-size: 200%;
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-            animation: goldShift 4s ease infinite;
-        }
-        .header .sub { color: #9a9588; font-size: 0.78rem; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 500; }
+        .header h1 { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 900; }
+        .lib-name { background: linear-gradient(135deg, #c9a84c, #f0d878, #c9a84c); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: goldShift 4s ease infinite; }
+        .sub { color: #9a9588; font-size: 0.74rem; letter-spacing: 1.5px; text-transform: uppercase; }
         
-        .btn-row { display: flex; gap: 7px; flex-wrap: wrap; justify-content: center; align-items: center; margin-top: 10px; }
-        .btn { 
-            padding: 9px 17px; border: none; border-radius: 50px; font-weight: 700; font-size: 0.74rem; 
-            cursor: pointer; letter-spacing: 0.5px; transition: 0.3s; font-family: 'Inter', sans-serif; 
-            text-transform: uppercase; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; 
-        }
+        .btn-row { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; align-items: center; margin-top: 10px; }
+        .btn { padding: 9px 15px; border: none; border-radius: 50px; font-weight: 700; font-size: 0.72rem; cursor: pointer; letter-spacing: 0.5px; transition: 0.3s; font-family: 'Inter', sans-serif; text-transform: uppercase; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
         .btn-gold { background: linear-gradient(135deg, #c9a84c, #a07820); color: #fff; box-shadow: 0 6px 20px rgba(201,168,76,0.3); }
-        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 12px 35px rgba(201,168,76,0.5); }
-        .btn-purple { background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: #fff; box-shadow: 0 6px 20px rgba(139,92,246,0.3); }
-        .btn-purple:hover { transform: translateY(-2px); box-shadow: 0 12px 35px rgba(139,92,246,0.5); }
+        .btn-gold:hover { transform: translateY(-2px); }
+        .btn-purple { background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: #fff; }
         .btn-outline { background: transparent; border: 1.5px solid rgba(201,168,76,0.15); color: #e8e6e1; }
-        .btn-outline:hover { border-color: #c9a84c; background: rgba(201,168,76,0.06); transform: translateY(-2px); }
-        .btn-sm { padding: 6px 11px; font-size: 0.64rem; }
+        .btn-outline:hover { border-color: #c9a84c; background: rgba(201,168,76,0.06); }
+        .btn-sm { padding: 6px 10px; font-size: 0.62rem; }
         .btn-red { background: rgba(231,76,60,0.12); border: 1.5px solid rgba(231,76,60,0.3); color: #e74c3c; }
-        .btn-red:hover { background: #e74c3c; color: #fff; border-color: #e74c3c; transform: translateY(-2px); }
+        .btn-red:hover { background: #e74c3c; color: #fff; }
         
-        .badge { padding: 5px 13px; border-radius: 50px; font-size: 0.68rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; letter-spacing: 0.3px; }
+        .badge { padding: 5px 12px; border-radius: 50px; font-size: 0.65rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
         .badge-green { background: rgba(46,204,113,0.08); border: 1px solid rgba(46,204,113,0.2); color: #2ecc71; }
         .badge-red { background: rgba(231,76,60,0.08); border-color: rgba(231,76,60,0.2); color: #e74c3c; }
-        .badge-gold { background: rgba(201,168,76,0.06); border: 1px solid rgba(201,168,76,0.2); color: #c9a84c; cursor: pointer; transition: 0.3s; }
-        .badge-gold:hover { background: rgba(201,168,76,0.15); }
+        .badge-gold { background: rgba(201,168,76,0.06); border: 1px solid rgba(201,168,76,0.2); color: #c9a84c; cursor: pointer; }
         
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 14px; }
-        .stat-card { 
-            background: rgba(255,255,255,0.02); backdrop-filter: blur(25px); border: 1px solid rgba(201,168,76,0.08); 
-            border-radius: var(--radius); padding: 15px 12px; text-align: center; transition: 0.3s; 
-        }
-        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(0,0,0,0.5); border-color: rgba(201,168,76,0.2); }
-        .stat-card .s-icon { font-size: 22px; margin-bottom: 3px; }
-        .stat-card .s-lbl { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 1.5px; color: #9a9588; font-weight: 700; margin: 4px 0; }
-        .stat-card .s-val { font-size: 1.6rem; font-weight: 900; letter-spacing: -1px; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 14px; }
+        .stat-card { background: rgba(255,255,255,0.02); backdrop-filter: blur(25px); border: 1px solid rgba(201,168,76,0.08); border-radius: var(--radius); padding: 14px 12px; text-align: center; transition: 0.3s; }
+        .stat-card:hover { transform: translateY(-3px); }
+        .stat-card .s-icon { font-size: 22px; }
+        .stat-card .s-lbl { font-size: 0.56rem; text-transform: uppercase; letter-spacing: 1.5px; color: #9a9588; font-weight: 700; margin: 4px 0; }
+        .stat-card .s-val { font-size: 1.5rem; font-weight: 900; }
         
-        .quick-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 7px; margin-bottom: 14px; }
-        .quick-card { 
-            background: rgba(255,255,255,0.02); backdrop-filter: blur(25px); border: 1px solid rgba(201,168,76,0.08); 
-            border-radius: var(--radius); padding: 13px 12px; text-align: center; cursor: pointer; transition: 0.3s; 
-        }
-        .quick-card:hover { border-color: #c9a84c; transform: translateY(-3px); box-shadow: 0 12px 30px rgba(201,168,76,0.08); background: rgba(201,168,76,0.03); }
-        .quick-card .q-icon { font-size: 26px; margin-bottom: 3px; }
-        .quick-card .q-lbl { font-size: 0.63rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #9a9588; }
-        .quick-card .q-num { font-size: 1.2rem; font-weight: 900; color: #c9a84c; margin-top: 2px; }
+        .quick-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 7px; margin-bottom: 14px; }
+        .quick-card { background: rgba(255,255,255,0.02); backdrop-filter: blur(25px); border: 1px solid rgba(201,168,76,0.08); border-radius: var(--radius); padding: 12px 10px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .quick-card:hover { border-color: #c9a84c; transform: translateY(-3px); }
+        .quick-card .q-icon { font-size: 24px; }
+        .quick-card .q-lbl { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #9a9588; }
+        .quick-card .q-num { font-size: 1.1rem; font-weight: 900; color: #c9a84c; margin-top: 2px; }
         
-        .card { 
-            background: rgba(255,255,255,0.02); backdrop-filter: blur(25px); border: 1px solid rgba(201,168,76,0.08); 
-            border-radius: var(--radius); padding: 18px; margin-bottom: 14px; transition: 0.3s;
-        }
-        .card:hover { border-color: rgba(201,168,76,0.2); box-shadow: 0 10px 30px rgba(201,168,76,0.05); }
-        .card h3 { font-size: 0.84rem; font-weight: 700; margin-bottom: 14px; color: #c9a84c; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
+        .card { background: rgba(255,255,255,0.02); backdrop-filter: blur(25px); border: 1px solid rgba(201,168,76,0.08); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; }
+        .card h3 { font-size: 0.8rem; font-weight: 700; margin-bottom: 12px; color: #c9a84c; text-transform: uppercase; letter-spacing: 1px; }
         
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 12px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 10px; }
         .form-group { display: flex; flex-direction: column; gap: 3px; }
         .form-group.full { grid-column: 1 / -1; }
-        .form-group label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 1px; color: #9a9588; font-weight: 700; }
-        input, select, textarea { 
-            padding: 10px 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(201,168,76,0.1); 
-            border-radius: var(--radius-sm); color: #e8e6e1; font-size: 0.78rem; font-family: 'Inter', sans-serif; 
-            outline: none; width: 100%; transition: 0.3s; 
-        }
-        input:focus, select:focus, textarea:focus { border-color: #c9a84c; box-shadow: 0 0 0 3px rgba(201,168,76,0.07); background: rgba(255,255,255,0.05); }
-        textarea { resize: vertical; min-height: 55px; }
+        .form-group label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1px; color: #9a9588; font-weight: 700; }
+        input, select, textarea { padding: 10px 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(201,168,76,0.1); border-radius: var(--radius-sm); color: #e8e6e1; font-size: 0.76rem; font-family: 'Inter', sans-serif; outline: none; width: 100%; }
+        input:focus, select:focus, textarea:focus { border-color: #c9a84c; }
+        textarea { resize: vertical; min-height: 50px; }
         select option { background: #111125; color: #fff; }
         
-        /* Photo Upload */
-        .photo-area {
-            border: 2px dashed rgba(201,168,76,0.15); border-radius: var(--radius-sm);
-            padding: 16px; text-align: center; cursor: pointer; transition: 0.3s;
-            min-height: 120px; display: flex; flex-direction: column; align-items: center;
-            justify-content: center; gap: 6px; position: relative;
-        }
-        .photo-area:hover { border-color: #c9a84c; background: rgba(201,168,76,0.03); }
-        .photo-area.has-photo { border-style: solid; border-color: #c9a84c; padding: 8px; }
-        .photo-area img { max-width: 100%; max-height: 160px; border-radius: 8px; object-fit: cover; }
+        .photo-area { border: 2px dashed rgba(201,168,76,0.15); border-radius: var(--radius-sm); padding: 14px; text-align: center; cursor: pointer; min-height: 110px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; position: relative; }
+        .photo-area:hover { border-color: #c9a84c; }
+        .photo-area.has-photo { border-style: solid; border-color: #c9a84c; padding: 6px; }
+        .photo-area img { max-width: 100%; max-height: 150px; border-radius: 8px; }
         .photo-area input[type="file"] { display: none; }
-        .photo-area .ph-placeholder { color: #9a9588; font-size: 0.72rem; line-height: 1.5; }
-        .photo-area .ph-remove {
-            position: absolute; top: 8px; right: 8px; background: #e74c3c; color: #fff;
-            border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer;
-            font-size: 12px; display: none; align-items: center; justify-content: center; z-index: 5;
-        }
+        .photo-area .ph-placeholder { color: #9a9588; font-size: 0.7rem; }
+        .photo-area .ph-remove { position: absolute; top: 6px; right: 6px; background: #e74c3c; color: #fff; border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: 11px; display: none; align-items: center; justify-content: center; }
         .photo-area.has-photo .ph-remove { display: flex; }
-        .photo-size-info { font-size: 0.58rem; color: #f39c12; margin-top: 2px; }
         
         .form-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-        
         .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-        .search-wrap { flex: 3; min-width: 180px; position: relative; }
-        .search-wrap input { padding-left: 34px; }
-        .search-wrap span { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: #9a9588; font-size: 0.85rem; }
-        .filter-bar select { flex: 1; min-width: 120px; max-width: 180px; }
+        .search-wrap { flex: 3; min-width: 160px; position: relative; }
+        .search-wrap input { padding-left: 32px; }
+        .search-wrap span { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #9a9588; }
+        .filter-bar select { flex: 1; min-width: 110px; max-width: 170px; }
         
-        .table-wrap { max-height: 420px; overflow: auto; }
-        .table-wrap::-webkit-scrollbar { width: 5px; height: 5px; }
+        .table-wrap { max-height: 400px; overflow: auto; -webkit-overflow-scrolling: touch; }
+        .table-wrap::-webkit-scrollbar { width: 4px; height: 4px; }
         .table-wrap::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.18); border-radius: 10px; }
-        table { width: 100%; border-collapse: collapse; min-width: 950px; }
-        th { 
-            padding: 10px 7px; text-align: left; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1px; 
-            color: #9a9588; font-weight: 700; background: rgba(0,0,0,0.4); position: sticky; top: 0; 
-            white-space: nowrap; cursor: pointer; transition: 0.2s; 
-        }
+        table { width: 100%; border-collapse: collapse; min-width: 850px; }
+        th { padding: 10px 6px; text-align: left; font-size: 0.58rem; text-transform: uppercase; letter-spacing: 1px; color: #9a9588; font-weight: 700; background: rgba(0,0,0,0.4); position: sticky; top: 0; white-space: nowrap; cursor: pointer; }
         th:hover { color: #c9a84c; }
-        td { padding: 8px 7px; border-bottom: 1px solid rgba(201,168,76,0.05); font-size: 0.72rem; white-space: nowrap; vertical-align: middle; }
-        tbody tr { transition: 0.2s; }
+        td { padding: 7px 6px; border-bottom: 1px solid rgba(201,168,76,0.05); font-size: 0.7rem; white-space: nowrap; }
         tbody tr:hover { background: rgba(201,168,76,0.02); }
-        .empty-row { text-align: center; padding: 55px; color: #9a9588; }
+        .empty-row { text-align: center; padding: 45px; color: #9a9588; }
         
-        .thumb { width: 38px; height: 38px; border-radius: 8px; object-fit: cover; cursor: pointer; border: 2px solid rgba(201,168,76,0.15); transition: 0.3s; }
-        .thumb:hover { transform: scale(1.3); border-color: #c9a84c; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .no-thumb { width: 38px; height: 38px; border-radius: 8px; background: rgba(255,255,255,0.03); display: inline-flex; align-items: center; justify-content: center; font-size: 1.1rem; border: 2px solid rgba(201,168,76,0.15); }
-        
+        .thumb { width: 35px; height: 35px; border-radius: 8px; object-fit: cover; cursor: pointer; border: 2px solid rgba(201,168,76,0.15); }
+        .thumb:hover { transform: scale(1.3); border-color: #c9a84c; }
+        .no-thumb { width: 35px; height: 35px; border-radius: 8px; background: rgba(255,255,255,0.03); display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; border: 2px solid rgba(201,168,76,0.15); }
         .row-expired { opacity: 0.5; }
-        .tag { font-size: 0.52rem; font-weight: 700; padding: 3px 7px; border-radius: 4px; display: inline-block; letter-spacing: 0.3px; }
+        .tag { font-size: 0.5rem; font-weight: 700; padding: 2px 6px; border-radius: 3px; display: inline-block; }
         .tag-a { background: rgba(46,204,113,0.15); color: #2ecc71; }
         .tag-e { background: rgba(243,156,18,0.15); color: #f39c12; }
         .tag-x { background: rgba(231,76,60,0.15); color: #e74c3c; }
-        
-        .sensitive { filter: blur(4px); cursor: pointer; transition: 0.3s; }
+        .sensitive { filter: blur(4px); cursor: pointer; }
         .sensitive.show { filter: none; }
-        .sensitive:hover { filter: blur(2px); }
-        .sensitive.show:hover { filter: none; }
         
-        .tbl-btn { padding: 4px 8px; border-radius: 5px; cursor: pointer; font-size: 0.56rem; font-weight: 600; transition: 0.2s; font-family: 'Inter', sans-serif; border: 1px solid transparent; margin: 0 1px; }
+        .tbl-btn { padding: 3px 7px; border-radius: 4px; cursor: pointer; font-size: 0.54rem; font-weight: 600; border: 1px solid transparent; margin: 0 1px; }
         .tbl-e { background: rgba(91,155,213,0.15); color: #5b9bd5; border-color: rgba(91,155,213,0.3); }
         .tbl-e:hover { background: #5b9bd5; color: #fff; }
         .tbl-d { background: rgba(46,204,113,0.15); color: #2ecc71; border-color: rgba(46,204,113,0.3); }
@@ -289,60 +288,51 @@
         .tbl-x { background: rgba(231,76,60,0.15); color: #e74c3c; border-color: rgba(231,76,60,0.3); }
         .tbl-x:hover { background: #e74c3c; color: #fff; }
         
-        .toast { 
-            position: fixed; bottom: 24px; right: 24px; background: #1a1a35; border: 1px solid rgba(201,168,76,0.1); 
-            backdrop-filter: blur(25px); padding: 12px 20px; border-radius: 12px; color: #fff; font-weight: 600; 
-            font-size: 0.76rem; z-index: 999; animation: tIn 0.4s ease, tOut 0.4s ease 2.3s forwards; 
-            display: flex; align-items: center; gap: 7px; box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-        }
-        .toast.ok { border-left: 4px solid #2ecc71; }
-        .toast.err { border-left: 4px solid #e74c3c; }
-        .toast.warn { border-left: 4px solid #f39c12; }
+        .toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a35; border: 1px solid rgba(201,168,76,0.1); backdrop-filter: blur(25px); padding: 12px 18px; border-radius: 12px; color: #fff; font-weight: 600; font-size: 0.74rem; z-index: 999; animation: tIn 0.4s ease, tOut 0.4s ease 2.3s forwards; display: flex; align-items: center; gap: 7px; max-width: 90vw; }
+        .toast.ok { border-left: 4px solid #2ecc71; } .toast.err { border-left: 4px solid #e74c3c; } .toast.warn { border-left: 4px solid #f39c12; }
         @keyframes tIn { from{transform:translateY(80px);opacity:0} to{transform:translateY(0);opacity:1} }
         @keyframes tOut { to{opacity:0;transform:translateY(-20px)} }
         
-        .modal-overlay { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.78); backdrop-filter: blur(8px); z-index: 998; 
-            display: flex; align-items: center; justify-content: center; 
-        }
-        .modal { 
-            background: #111125; border: 1px solid rgba(201,168,76,0.1); border-radius: var(--radius); 
-            padding: 20px; width: 92%; max-width: 540px; max-height: 82vh; overflow-y: auto; 
-            box-shadow: 0 30px 60px rgba(0,0,0,0.7);
-        }
-        .modal h3 { color: #c9a84c; margin-bottom: 10px; font-size: 0.95rem; }
-        
-        .seat-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; margin: 8px 0; }
-        .seat-box { padding: 7px 3px; border-radius: 6px; text-align: center; font-size: 0.65rem; font-weight: 700; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.78); backdrop-filter: blur(8px); z-index: 998; display: flex; align-items: center; justify-content: center; }
+        .modal { background: #111125; border: 1px solid rgba(201,168,76,0.1); border-radius: var(--radius); padding: 18px; width: 92%; max-width: 520px; max-height: 80vh; overflow-y: auto; }
+        .modal h3 { color: #c9a84c; margin-bottom: 10px; font-size: 0.9rem; }
+        .seat-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; margin: 8px 0; }
+        .seat-box { padding: 6px 2px; border-radius: 5px; text-align: center; font-size: 0.6rem; font-weight: 700; }
         .seat-free { background: rgba(46,204,113,0.12); color: #2ecc71; border: 1px solid rgba(46,204,113,0.2); }
         .seat-taken { background: rgba(231,76,60,0.12); color: #e74c3c; border: 1px solid rgba(231,76,60,0.2); }
 
         @media (max-width: 768px) {
-            .header h1 { font-size: 1.6rem; }
+            .header h1 { font-size: 1.5rem; }
             .form-grid { grid-template-columns: 1fr 1fr; }
-            table { min-width: 750px; }
-            .seat-grid { grid-template-columns: repeat(5, 1fr); }
+            table { min-width: 700px; }
+            .seat-grid { grid-template-columns: repeat(6, 1fr); }
         }
         @media (max-width: 480px) {
             .form-grid { grid-template-columns: 1fr; }
-            .pin-dot { width: 46px; height: 52px; font-size: 1.4rem; }
+            .pin-dot { width: 46px; height: 52px; font-size: 1.3rem; }
             .numpad button { width: 54px; height: 48px; font-size: 1.1rem; }
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .seat-grid { grid-template-columns: repeat(5, 1fr); }
         }
     </style>
 </head>
 <body>
 
-    <!-- ═══════════════ LOCK SCREEN ═══════════════ -->
+    <!-- Install Banner -->
+    <div class="install-banner" id="installBanner" style="display:none;">
+        <span class="banner-close" onclick="document.getElementById('installBanner').style.display='none'">✕</span>
+        <span class="banner-icon">📚</span>
+        <div class="banner-text">
+            <h4>Install Bawa Library</h4>
+            <p>Add to home screen for app experience</p>
+        </div>
+        <button class="banner-btn" id="installBtn">INSTALL</button>
+    </div>
+
+    <!-- Lock Screen -->
     <div class="lock-screen" id="lockScreen">
         <div class="logo-container">
-            <div class="logo-outer">
-                <div class="logo-inner">📚</div>
-                <div class="logo-sparkle"></div>
-                <div class="logo-sparkle"></div>
-                <div class="logo-sparkle"></div>
-                <div class="logo-sparkle"></div>
-            </div>
+            <div class="logo-outer"><div class="logo-inner">📚</div></div>
         </div>
         <div class="lock-name">Bawa Library</div>
         <div class="lock-text">Secure Access Required</div>
@@ -359,103 +349,83 @@
             <button>7</button><button>8</button><button>9</button>
             <button class="clear-btn">Clear</button><button>0</button><button class="del-btn">⌫</button>
         </div>
-        <div class="lock-footer">Bawa Library Management System</div>
     </div>
 
-    <!-- ═══════════════ MAIN APP ═══════════════ -->
+    <!-- Main App -->
     <div class="main-app blurred" id="mainApp">
-        <div class="container">
-            <!-- Header -->
-            <div class="header">
-                <div class="h-logo">📚</div>
-                <h1><span class="lib-name">Bawa Library</span></h1>
-                <p class="sub">Enterprise Management · <span id="hSeats">51</span> Seats</p>
-                <div class="btn-row">
-                    <span class="badge badge-green" id="secBadge">🛡️ Unlocked</span>
-                    <span class="badge badge-gold" id="maskToggle">👁️ Aadhar Hidden</span>
-                    <button class="btn btn-outline btn-sm" id="themeToggle">🌓 Theme</button>
-                    <button class="btn btn-purple btn-sm" id="adminBtn">⚙️ Admin</button>
-                    <button class="btn btn-red btn-sm" id="lockBtn">🔒 Lock</button>
-                    <button class="btn btn-outline btn-sm" id="importBtn">📥 Import</button>
-                    <button class="btn btn-outline btn-sm" id="exportBtn">📤 Export</button>
-                    <button class="btn btn-outline btn-sm" id="backupBtn">💾 Backup</button>
-                </div>
+        <div class="header">
+            <div class="h-logo">📚</div>
+            <h1><span class="lib-name">Bawa Library</span></h1>
+            <p class="sub">Management System · <span id="hSeats">51</span> Seats</p>
+            <div class="btn-row">
+                <span class="badge badge-green" id="secBadge">🛡️ Unlocked</span>
+                <span class="badge badge-gold" id="maskToggle">👁️ Aadhar Hidden</span>
+                <button class="btn btn-outline btn-sm" id="themeToggle">🌓</button>
+                <button class="btn btn-purple btn-sm" id="adminBtn">⚙️ Admin</button>
+                <button class="btn btn-red btn-sm" id="lockBtn">🔒 Lock</button>
+                <button class="btn btn-outline btn-sm" id="exportBtn">📤</button>
+                <button class="btn btn-outline btn-sm" id="backupBtn">💾</button>
+                <button class="btn btn-outline btn-sm" id="importBtn">📥</button>
             </div>
+        </div>
 
-            <!-- Stats -->
-            <div class="stats">
-                <div class="stat-card"><div class="s-icon">🏛️</div><div class="s-lbl">Total Seats</div><div class="s-val" style="color:#c9a84c;" id="stTotal">51</div></div>
-                <div class="stat-card"><div class="s-icon">👥</div><div class="s-lbl">Occupied</div><div class="s-val" style="color:#e74c3c;" id="stFilled">0</div></div>
-                <div class="stat-card"><div class="s-icon">🪑</div><div class="s-lbl">Vacant</div><div class="s-val" style="color:#2ecc71;" id="stVacant">51</div></div>
-                <div class="stat-card"><div class="s-icon">⏳</div><div class="s-lbl">Expiring</div><div class="s-val" style="color:#f39c12;" id="stExp">0</div></div>
-                <div class="stat-card"><div class="s-icon">⚠️</div><div class="s-lbl">Expired</div><div class="s-val" style="color:#95a5a6;" id="stExd">0</div></div>
-            </div>
+        <div class="stats">
+            <div class="stat-card"><div class="s-icon">🏛️</div><div class="s-lbl">Total</div><div class="s-val" style="color:#c9a84c;" id="stTotal">51</div></div>
+            <div class="stat-card"><div class="s-icon">👥</div><div class="s-lbl">Filled</div><div class="s-val" style="color:#e74c3c;" id="stFilled">0</div></div>
+            <div class="stat-card"><div class="s-icon">🪑</div><div class="s-lbl">Vacant</div><div class="s-val" style="color:#2ecc71;" id="stVacant">51</div></div>
+            <div class="stat-card"><div class="s-icon">⏳</div><div class="s-lbl">Expiring</div><div class="s-val" style="color:#f39c12;" id="stExp">0</div></div>
+            <div class="stat-card"><div class="s-icon">⚠️</div><div class="s-lbl">Expired</div><div class="s-val" style="color:#95a5a6;" id="stExd">0</div></div>
+        </div>
 
-            <!-- Quick Actions -->
-            <div class="quick-row">
-                <div class="quick-card" id="qReg"><div class="q-icon">➕</div><div class="q-lbl">Register</div></div>
-                <div class="quick-card" id="qExp"><div class="q-icon">⏳</div><div class="q-lbl">Expiring</div><div class="q-num" id="qExpN">0</div></div>
-                <div class="quick-card" id="qExd"><div class="q-icon">⚠️</div><div class="q-lbl">Expired</div><div class="q-num" id="qExdN">0</div></div>
-                <div class="quick-card" id="qVac"><div class="q-icon">🪑</div><div class="q-lbl">Vacant</div><div class="q-num" id="qVacN">51</div></div>
-                <div class="quick-card" id="qAll"><div class="q-icon">👥</div><div class="q-lbl">All Members</div><div class="q-num" id="qAllN">0</div></div>
-            </div>
+        <div class="quick-row">
+            <div class="quick-card" id="qReg"><div class="q-icon">➕</div><div class="q-lbl">Register</div></div>
+            <div class="quick-card" id="qExp"><div class="q-icon">⏳</div><div class="q-lbl">Expiring</div><div class="q-num" id="qExpN">0</div></div>
+            <div class="quick-card" id="qExd"><div class="q-icon">⚠️</div><div class="q-lbl">Expired</div><div class="q-num" id="qExdN">0</div></div>
+            <div class="quick-card" id="qVac"><div class="q-icon">🪑</div><div class="q-lbl">Vacant</div><div class="q-num" id="qVacN">51</div></div>
+            <div class="quick-card" id="qAll"><div class="q-icon">👥</div><div class="q-lbl">All</div><div class="q-num" id="qAllN">0</div></div>
+        </div>
 
-            <!-- Registration Form -->
-            <div class="card" id="formCard">
-                <h3 id="formTitle">📝 Register New Member</h3>
-                <input type="hidden" id="editIdx" value="-1">
-                <div class="form-grid">
-                    <div class="form-group"><label>Full Name *</label><input type="text" id="sName" placeholder="Enter full name"></div>
-                    <div class="form-group"><label>Seat Number *</label><select id="sSeat"></select></div>
-                    <div class="form-group"><label>Aadhar Number *</label><input type="text" id="sAadhar" placeholder="XXXX XXXX XXXX" maxlength="14"></div>
-                    <div class="form-group"><label>Contact Number *</label><input type="text" id="sContact" placeholder="Mobile number"></div>
-                    <div class="form-group"><label>Valid From *</label><input type="date" id="sStart"></div>
-                    <div class="form-group"><label>Valid Until *</label><input type="date" id="sEnd"></div>
-                    <div class="form-group full"><label>Address *</label><textarea id="sAddress" placeholder="Full address" rows="2"></textarea></div>
-                    <div class="form-group">
-                        <label>Member Photo <span style="color:#f39c12;font-weight:400;">(Max 15MB)</span></label>
-                        <div class="photo-area" id="photoArea">
-                            <img id="photoPreview" src="" style="display:none;" alt="Preview">
-                            <span class="ph-placeholder" id="photoPlace">📷 Click to upload<br><small>JPG, PNG, WEBP · Up to 15MB</small></span>
-                            <span class="photo-size-info" id="photoInfo"></span>
-                            <button class="ph-remove" id="photoRemove">✕</button>
-                            <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp">
-                        </div>
+        <div class="card" id="formCard">
+            <h3 id="formTitle">📝 Register New Member</h3>
+            <input type="hidden" id="editIdx" value="-1">
+            <div class="form-grid">
+                <div class="form-group"><label>Full Name *</label><input type="text" id="sName" placeholder="Full name"></div>
+                <div class="form-group"><label>Seat Number *</label><select id="sSeat"></select></div>
+                <div class="form-group"><label>Aadhar *</label><input type="text" id="sAadhar" placeholder="XXXX XXXX XXXX" maxlength="14"></div>
+                <div class="form-group"><label>Contact *</label><input type="text" id="sContact" placeholder="Mobile"></div>
+                <div class="form-group"><label>Valid From *</label><input type="date" id="sStart"></div>
+                <div class="form-group"><label>Valid Until *</label><input type="date" id="sEnd"></div>
+                <div class="form-group full"><label>Address *</label><textarea id="sAddress" rows="2" placeholder="Full address"></textarea></div>
+                <div class="form-group">
+                    <label>Photo <span style="color:#f39c12;">(Max 15MB)</span></label>
+                    <div class="photo-area" id="photoArea">
+                        <img id="photoPreview" src="" style="display:none;">
+                        <span class="ph-placeholder" id="photoPlace">📷 Click to upload</span>
+                        <button class="ph-remove" id="photoRemove">✕</button>
+                        <input type="file" id="photoInput" accept="image/*">
                     </div>
-                    <div class="form-group"><label>Email</label><input type="email" id="sEmail" placeholder="email@example.com"></div>
-                    <div class="form-group"><label>Date of Birth</label><input type="date" id="sDob"></div>
-                    <div class="form-group"><label>Notes</label><input type="text" id="sNotes" placeholder="Additional notes"></div>
                 </div>
-                <div class="form-actions">
-                    <button class="btn btn-gold" id="addBtn">✅ Register Member</button>
-                    <button class="btn btn-outline btn-sm" id="cancelBtn" style="display:none;">❌ Cancel Edit</button>
-                    <button class="btn btn-outline btn-sm" id="clearBtn">🧹 Clear Form</button>
-                </div>
+                <div class="form-group"><label>Email</label><input type="email" id="sEmail"></div>
+                <div class="form-group"><label>Notes</label><input type="text" id="sNotes"></div>
             </div>
-
-            <!-- Filter -->
-            <div class="filter-bar">
-                <div class="search-wrap"><span>🔍</span><input type="text" id="searchInput" placeholder="Search name, phone, card ID..."></div>
-                <select id="filterStatus"><option value="">All Status</option><option value="active">Active</option><option value="expired">Expired</option><option value="expiring">Expiring Soon</option></select>
-                <button class="btn btn-outline btn-sm" id="clearFilter">✕ Clear</button>
+            <div class="form-actions">
+                <button class="btn btn-gold" id="addBtn">✅ Register</button>
+                <button class="btn btn-outline btn-sm" id="cancelBtn" style="display:none;">❌ Cancel</button>
+                <button class="btn btn-outline btn-sm" id="clearBtn">🧹 Clear</button>
             </div>
+        </div>
 
-            <!-- Table -->
-            <div class="card" style="padding:0;overflow:hidden;">
-                <div style="padding:12px 18px;border-bottom:1px solid rgba(201,168,76,0.08);display:flex;justify-content:space-between;align-items:center;">
-                    <h3 style="margin:0;">👥 Members <span style="background:#c9a84c;color:#000;padding:3px 10px;border-radius:50px;font-size:0.62rem;font-weight:800;" id="tblCount">0</span></h3>
-                    <span style="font-size:0.6rem;color:#9a9588;">Click headers to sort</span>
-                </div>
-                <div class="table-wrap">
-                    <table>
-                        <thead><tr>
-                            <th>Photo</th><th data-sort="cardId">Card ID</th><th data-sort="name">Name</th>
-                            <th data-sort="seatNumber">Seat</th><th>Aadhar</th><th data-sort="contactNumber">Contact</th>
-                            <th data-sort="validityEnd">Valid Until</th><th data-sort="status">Status</th><th>Actions</th>
-                        </tr></thead>
-                        <tbody id="tableBody"><tr><td colspan="9"><div class="empty-row">📭<p>No members registered yet</p></div></td></tr></tbody>
-                    </table>
-                </div>
+        <div class="filter-bar">
+            <div class="search-wrap"><span>🔍</span><input type="text" id="searchInput" placeholder="Search..."></div>
+            <select id="filterStatus"><option value="">All</option><option value="active">Active</option><option value="expired">Expired</option><option value="expiring">Expiring</option></select>
+            <button class="btn btn-outline btn-sm" id="clearFilter">✕</button>
+        </div>
+
+        <div class="card" style="padding:0;overflow:hidden;">
+            <div style="padding:10px 16px;border-bottom:1px solid rgba(201,168,76,0.08);"><h3 style="margin:0;">👥 Members <span style="background:#c9a84c;color:#000;padding:2px 8px;border-radius:50px;font-size:0.6rem;" id="tblCount">0</span></h3></div>
+            <div class="table-wrap">
+                <table><thead><tr><th>Photo</th><th data-sort="cardId">Card ID</th><th data-sort="name">Name</th><th data-sort="seatNumber">Seat</th><th>Aadhar</th><th data-sort="contactNumber">Contact</th><th data-sort="validityEnd">Valid Until</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody id="tableBody"><tr><td colspan="9"><div class="empty-row">📭<p>No members yet</p></div></td></tr></tbody></table>
             </div>
         </div>
     </div>
@@ -465,104 +435,82 @@
 
     <script>
         // ══════════════════════════════════════════════
-        // BAWA LIBRARY - FINAL PRODUCTION VERSION
+        // BAWA LIBRARY - FULL WORKING PWA
         // ══════════════════════════════════════════════
-        const DB_KEY = 'bawa_db_v8';
-        const PIN_KEY = 'bawa_pin_v8';
-        const SEATS_KEY = 'bawa_seats_v8';
-        const THEME_KEY = 'bawa_theme_v8';
-        const MAX_PHOTO_SIZE = 15 * 1024 * 1024; // 15MB
+        
+        // PWA Install
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBanner').style.display = 'flex';
+        });
+        document.getElementById('installBtn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                document.getElementById('installBanner').style.display = 'none';
+                deferredPrompt = null;
+            }
+        });
+        window.addEventListener('appinstalled', () => {
+            document.getElementById('installBanner').style.display = 'none';
+        });
 
-        let members = [];
-        let adminPIN = '1234';
-        let totalSeats = 51;
-        let isLocked = true;
-        let darkTheme = true;
-        let aadharVisible = false;
-        let pinAttempts = 0;
-        let pinCooldown = false;
-        let tempPhoto = null;
-        let currentSort = { field: 'seatNumber', asc: true };
+        // Data
+        const DB_KEY = 'bawa_db_final_pwa';
+        const PIN_KEY = 'bawa_pin_final_pwa';
+        const SEATS_KEY = 'bawa_seats_final_pwa';
+        const THEME_KEY = 'bawa_theme_final_pwa';
+        const MAX_PHOTO = 15 * 1024 * 1024;
 
-        // ═══════════ TOAST ═══════════
+        let members = [], adminPIN = '1234', totalSeats = 51;
+        let isLocked = true, darkTheme = true, aadharVisible = false;
+        let pinAttempts = 0, pinCooldown = false, tempPhoto = null;
+
         function toast(msg, type = 'ok') {
             const box = document.getElementById('toastBox');
             const t = document.createElement('div');
             t.className = `toast ${type}`;
-            const icons = { ok: '✅', err: '⚠️', warn: '📢' };
-            t.innerHTML = (icons[type] || '') + ' ' + msg;
+            t.innerHTML = (type==='ok'?'✅ ':(type==='err'?'⚠️ ':'📢 ')) + msg;
             box.appendChild(t);
             setTimeout(() => t.remove(), 2500);
         }
 
-        // ═══════════ PIN SYSTEM ═══════════
-        function loadPIN() {
-            const saved = localStorage.getItem(PIN_KEY);
-            if (saved) adminPIN = saved;
-        }
-
-        function savePIN(newPin) {
-            adminPIN = newPin;
-            localStorage.setItem(PIN_KEY, newPin);
-        }
-
-        function clearPinDots() {
-            ['p1', 'p2', 'p3', 'p4'].forEach(id => {
-                document.getElementById(id).value = '';
-                document.getElementById(id).classList.remove('filled', 'error');
-            });
-        }
+        function loadPIN() { const s = localStorage.getItem(PIN_KEY); if (s) adminPIN = s; }
+        function savePIN(p) { adminPIN = p; localStorage.setItem(PIN_KEY, p); }
+        function clearDots() { ['p1','p2','p3','p4'].forEach(id => { const el = document.getElementById(id); el.value = ''; el.classList.remove('filled','error'); }); }
 
         function checkPIN() {
             if (pinCooldown) return;
-            const entered = ['p1', 'p2', 'p3', 'p4'].map(id => document.getElementById(id).value).join('');
+            const entered = ['p1','p2','p3','p4'].map(id => document.getElementById(id).value).join('');
             if (entered.length === 4) {
                 if (entered === adminPIN) {
-                    unlockApp();
+                    isLocked = false; pinAttempts = 0;
+                    document.getElementById('lockScreen').classList.add('hidden');
+                    document.getElementById('mainApp').classList.remove('blurred');
+                    document.getElementById('secBadge').textContent = '🛡️ Unlocked';
+                    document.getElementById('secBadge').classList.remove('badge-red');
+                    document.getElementById('secBadge').classList.add('badge-green');
+                    clearDots();
+                    document.getElementById('pinMsg').textContent = 'Enter 4-digit PIN';
+                    document.getElementById('pinMsg').className = 'pin-msg info';
                 } else {
                     pinAttempts++;
-                    ['p1', 'p2', 'p3', 'p4'].forEach(id => document.getElementById(id).classList.add('error'));
-                    setTimeout(() => ['p1', 'p2', 'p3', 'p4'].forEach(id => document.getElementById(id).classList.remove('error')), 500);
-                    const remaining = 5 - pinAttempts;
+                    ['p1','p2','p3','p4'].forEach(id => document.getElementById(id).classList.add('error'));
+                    setTimeout(() => ['p1','p2','p3','p4'].forEach(id => document.getElementById(id).classList.remove('error')), 500);
+                    const rem = 5 - pinAttempts;
                     if (pinAttempts >= 5) {
                         pinCooldown = true;
-                        document.getElementById('pinMsg').textContent = '⛔ Too many attempts! Wait 30 seconds...';
+                        document.getElementById('pinMsg').textContent = '⛔ Locked! 30s...';
                         document.getElementById('pinMsg').className = 'pin-msg err';
                         document.querySelectorAll('.numpad button').forEach(b => b.disabled = true);
-                        let countdown = 30;
-                        const cd = setInterval(() => {
-                            countdown--;
-                            document.getElementById('pinMsg').textContent = `⛔ Locked! Wait ${countdown}s...`;
-                            if (countdown <= 0) {
-                                clearInterval(cd);
-                                pinCooldown = false;
-                                pinAttempts = 0;
-                                document.querySelectorAll('.numpad button').forEach(b => b.disabled = false);
-                                document.getElementById('pinMsg').textContent = 'Enter 4-digit PIN to unlock';
-                                document.getElementById('pinMsg').className = 'pin-msg info';
-                                clearPinDots();
-                            }
-                        }, 1000);
-                    } else {
-                        document.getElementById('pinMsg').textContent = `❌ Wrong PIN! ${remaining} attempt(s) remaining`;
-                        document.getElementById('pinMsg').className = 'pin-msg err';
-                    }
-                    clearPinDots();
+                        let cd = 30;
+                        const intv = setInterval(() => { cd--; document.getElementById('pinMsg').textContent = `⛔ ${cd}s...`; if (cd <= 0) { clearInterval(intv); pinCooldown = false; pinAttempts = 0; document.querySelectorAll('.numpad button').forEach(b => b.disabled = false); document.getElementById('pinMsg').textContent = 'Enter 4-digit PIN'; document.getElementById('pinMsg').className = 'pin-msg info'; clearDots(); } }, 1000);
+                    } else { document.getElementById('pinMsg').textContent = `❌ Wrong! ${rem} left`; document.getElementById('pinMsg').className = 'pin-msg err'; }
+                    clearDots();
                 }
             }
-        }
-
-        function unlockApp() {
-            isLocked = false;
-            pinAttempts = 0;
-            document.getElementById('lockScreen').classList.add('hidden');
-            document.getElementById('mainApp').classList.remove('blurred');
-            document.getElementById('secBadge').textContent = '🛡️ Unlocked';
-            document.getElementById('secBadge').classList.remove('badge-red');
-            document.getElementById('secBadge').classList.add('badge-green');
-            document.getElementById('pinMsg').textContent = 'Enter 4-digit PIN to unlock';
-            document.getElementById('pinMsg').className = 'pin-msg info';
-            clearPinDots();
         }
 
         function lockApp() {
@@ -572,95 +520,56 @@
             document.getElementById('secBadge').textContent = '🔒 Locked';
             document.getElementById('secBadge').classList.remove('badge-green');
             document.getElementById('secBadge').classList.add('badge-red');
-            clearPinDots();
-            document.getElementById('pinMsg').textContent = 'Enter 4-digit PIN to unlock';
-            document.getElementById('pinMsg').className = 'pin-msg info';
+            clearDots();
         }
 
-        // Numpad click handlers
         document.querySelectorAll('.numpad button').forEach(btn => {
             btn.addEventListener('click', function() {
                 if (pinCooldown) return;
-                const val = this.textContent;
-                const dots = ['p1', 'p2', 'p3', 'p4'].map(id => document.getElementById(id));
-                if (val === 'Clear') { clearPinDots(); }
-                else if (val === '⌫') {
-                    for (let i = 3; i >= 0; i--) { if (dots[i].value) { dots[i].value = ''; dots[i].classList.remove('filled'); break; } }
-                } else if (/^\d$/.test(val)) {
-                    for (let i = 0; i < 4; i++) {
-                        if (!dots[i].value) { dots[i].value = val; dots[i].classList.add('filled'); if (i === 3) checkPIN(); break; }
-                    }
-                }
+                const v = this.textContent;
+                const dots = ['p1','p2','p3','p4'].map(id => document.getElementById(id));
+                if (v === 'Clear') { clearDots(); }
+                else if (v === '⌫') { for (let i = 3; i >= 0; i--) { if (dots[i].value) { dots[i].value = ''; dots[i].classList.remove('filled'); break; } } }
+                else if (/^\d$/.test(v)) { for (let i = 0; i < 4; i++) { if (!dots[i].value) { dots[i].value = v; dots[i].classList.add('filled'); if (i === 3) checkPIN(); break; } } }
             });
         });
 
-        // Keyboard support
         document.addEventListener('keydown', function(e) {
             if (!isLocked || pinCooldown) return;
-            const dots = ['p1', 'p2', 'p3', 'p4'].map(id => document.getElementById(id));
-            if (e.key >= '0' && e.key <= '9') {
-                for (let i = 0; i < 4; i++) {
-                    if (!dots[i].value) { dots[i].value = e.key; dots[i].classList.add('filled'); if (i === 3) checkPIN(); break; }
-                }
-            } else if (e.key === 'Backspace') {
-                for (let i = 3; i >= 0; i--) { if (dots[i].value) { dots[i].value = ''; dots[i].classList.remove('filled'); break; } }
-            }
+            const dots = ['p1','p2','p3','p4'].map(id => document.getElementById(id));
+            if (e.key >= '0' && e.key <= '9') { for (let i = 0; i < 4; i++) { if (!dots[i].value) { dots[i].value = e.key; dots[i].classList.add('filled'); if (i === 3) checkPIN(); break; } } }
+            else if (e.key === 'Backspace') { for (let i = 3; i >= 0; i--) { if (dots[i].value) { dots[i].value = ''; dots[i].classList.remove('filled'); break; } } }
         });
 
-        // ═══════════ DATA MANAGEMENT ═══════════
         function loadData() {
             loadPIN();
-            const db = localStorage.getItem(DB_KEY);
-            members = db ? JSON.parse(db) : [];
-            const s = localStorage.getItem(SEATS_KEY);
-            if (s) totalSeats = parseInt(s) || 51;
+            const d = localStorage.getItem(DB_KEY); members = d ? JSON.parse(d) : [];
+            const s = localStorage.getItem(SEATS_KEY); if (s) totalSeats = parseInt(s) || 51;
             if (localStorage.getItem(THEME_KEY) === 'light') { darkTheme = false; document.body.classList.add('light-theme'); }
             refreshAll();
         }
-
-        function saveData() {
-            localStorage.setItem(DB_KEY, JSON.stringify(members));
-            localStorage.setItem(SEATS_KEY, totalSeats.toString());
-            localStorage.setItem(THEME_KEY, darkTheme ? 'dark' : 'light');
-        }
-
-        function cardId(seat) { return 'BWL-' + String(seat).padStart(3, '0'); }
-
-        function maskAadhar(a) {
-            if (aadharVisible) return a;
-            const d = a.replace(/\s/g, '');
-            return d.length < 8 ? '•••• •••• ••••' : 'XXXX XXXX ' + d.slice(-4);
-        }
+        function saveData() { localStorage.setItem(DB_KEY, JSON.stringify(members)); localStorage.setItem(SEATS_KEY, totalSeats.toString()); localStorage.setItem(THEME_KEY, darkTheme ? 'dark' : 'light'); }
+        function cardId(s) { return 'BWL-' + String(s).padStart(3, '0'); }
+        function maskAadhar(a) { if (aadharVisible) return a; const d = a.replace(/\s/g, ''); return d.length < 8 ? '•••• •••• ••••' : 'XXXX XXXX ' + d.slice(-4); }
 
         function popSeats(sel = null) {
             const s = document.getElementById('sSeat');
             const ei = parseInt(document.getElementById('editIdx').value);
             const taken = members.map(m => m.seatNumber);
-            s.innerHTML = '<option value="">-- Select Seat --</option>';
+            s.innerHTML = '<option value="">-- Select --</option>';
             for (let i = 1; i <= totalSeats; i++) {
                 const busy = taken.includes(i) && (ei === -1 || members[ei]?.seatNumber !== i);
-                s.innerHTML += `<option value="${i}" ${busy ? 'disabled' : ''}>Seat ${i} ${busy ? '(Occupied)' : '(✓ Available)'}</option>`;
+                s.innerHTML += `<option value="${i}" ${busy ? 'disabled' : ''}>Seat ${i} ${busy ? '(Taken)' : '(Free)'}</option>`;
             }
             if (sel && ei >= 0 && members[ei]?.seatNumber === sel) s.value = sel;
         }
 
-        function refreshAll() {
-            updateStats();
-            renderTable();
-            popSeats();
-            applyFilter();
-            updateQuickCounts();
-            document.getElementById('hSeats').textContent = totalSeats;
-        }
+        function refreshAll() { updateStats(); renderTable(); popSeats(); applyFilter(); updateQuickCounts(); document.getElementById('hSeats').textContent = totalSeats; }
 
         function updateQuickCounts() {
-            const now = new Date(); now.setHours(0, 0, 0, 0);
-            const wk = new Date(now); wk.setDate(wk.getDate() + 7);
+            const now = new Date(); now.setHours(0,0,0,0); const wk = new Date(now); wk.setDate(wk.getDate()+7);
             let exp = 0, exd = 0;
-            members.forEach(m => {
-                const e = new Date(m.validityEnd); e.setHours(0, 0, 0, 0);
-                if (e < now) exd++; else if (e <= wk) exp++;
-            });
+            members.forEach(m => { const e = new Date(m.validityEnd); e.setHours(0,0,0,0); if (e < now) exd++; else if (e <= wk) exp++; });
             document.getElementById('qExpN').textContent = exp;
             document.getElementById('qExdN').textContent = exd;
             document.getElementById('qVacN').textContent = totalSeats - members.length;
@@ -668,74 +577,30 @@
         }
 
         function updateStats() {
-            const now = new Date(); now.setHours(0, 0, 0, 0);
-            const wk = new Date(now); wk.setDate(wk.getDate() + 7);
-            const filled = members.length;
-            let exp = 0, exd = 0;
-            members.forEach(m => {
-                const e = new Date(m.validityEnd); e.setHours(0, 0, 0, 0);
-                if (e < now) exd++; else if (e <= wk) exp++;
-            });
+            const now = new Date(); now.setHours(0,0,0,0); const wk = new Date(now); wk.setDate(wk.getDate()+7);
+            const f = members.length; let exp = 0, exd = 0;
+            members.forEach(m => { const e = new Date(m.validityEnd); e.setHours(0,0,0,0); if (e < now) exd++; else if (e <= wk) exp++; });
             document.getElementById('stTotal').textContent = totalSeats;
-            document.getElementById('stFilled').textContent = filled;
-            document.getElementById('stVacant').textContent = totalSeats - filled;
+            document.getElementById('stFilled').textContent = f;
+            document.getElementById('stVacant').textContent = totalSeats - f;
             document.getElementById('stExp').textContent = exp;
             document.getElementById('stExd').textContent = exd;
-            document.getElementById('tblCount').textContent = filled;
+            document.getElementById('tblCount').textContent = f;
         }
 
-        function renderTable(data = null, sortField = null, sortAsc = null) {
+        function renderTable(data = null) {
             const tbody = document.getElementById('tableBody');
             let list = data || [...members];
-            const now = new Date(); now.setHours(0, 0, 0, 0);
-            const wk = new Date(now); wk.setDate(wk.getDate() + 7);
-            const sf = sortField || currentSort.field;
-            const sa = sortAsc !== null ? sortAsc : currentSort.asc;
-
-            list.sort((a, b) => {
-                let va, vb;
-                if (sf === 'status') {
-                    const ea = new Date(a.validityEnd); ea.setHours(0, 0, 0, 0);
-                    const eb = new Date(b.validityEnd); eb.setHours(0, 0, 0, 0);
-                    va = ea < now ? 0 : ea <= wk ? 1 : 2;
-                    vb = eb < now ? 0 : eb <= wk ? 1 : 2;
-                } else if (sf === 'validityStart' || sf === 'validityEnd') {
-                    va = new Date(a[sf]).getTime(); vb = new Date(b[sf]).getTime();
-                } else if (sf === 'seatNumber') { va = a[sf]; vb = b[sf]; }
-                else { va = (a[sf] || '').toString().toLowerCase(); vb = (b[sf] || '').toString().toLowerCase(); }
-                if (va < vb) return sa ? -1 : 1;
-                if (va > vb) return sa ? 1 : -1;
-                return 0;
-            });
-
-            if (list.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9"><div class="empty-row">📭<p>No members found</p></div></td></tr>';
-                return;
-            }
-
+            const now = new Date(); now.setHours(0,0,0,0); const wk = new Date(now); wk.setDate(wk.getDate()+7);
+            if (!list.length) { tbody.innerHTML = '<tr><td colspan="9"><div class="empty-row">📭<p>No members</p></div></td></tr>'; return; }
             tbody.innerHTML = list.map(m => {
-                const idx = members.indexOf(m);
-                const ed = new Date(m.validityEnd); ed.setHours(0, 0, 0, 0);
-                const isExd = ed < now, isExp = !isExd && ed <= wk;
-                const tag = isExd ? '<span class="tag tag-x">EXPIRED</span>' : (isExp ? '<span class="tag tag-e">EXPIRING</span>' : '<span class="tag tag-a">ACTIVE</span>');
-                const photoHTML = m.photo ? `<img src="${m.photo}" class="thumb" onclick="zoomPhoto('${m.cardId}')" title="Click to enlarge">` : '<span class="no-thumb">👤</span>';
-                return `<tr class="${isExd ? 'row-expired' : ''}">
-                    <td>${photoHTML}</td>
-                    <td><code style="color:#c9a84c;font-weight:600;">${m.cardId}</code></td>
-                    <td><strong>${esc(m.name)}</strong></td>
-                    <td style="color:#c9a84c;font-weight:700;">#${m.seatNumber}</td>
-                    <td><span class="sensitive ${aadharVisible ? 'show' : ''}" onclick="this.classList.toggle('show')" title="Click to reveal/hide">${maskAadhar(m.aadharNumber)}</span></td>
-                    <td>📞 ${esc(m.contactNumber)}</td>
-                    <td>${m.validityEnd} ${tag}</td>
-                    <td>${tag}</td>
-                    <td>
-                        <button class="tbl-btn tbl-e" data-i="${idx}">✏️</button>
-                        <button class="tbl-btn tbl-d" data-i="${idx}">📥</button>
-                        <button class="tbl-btn tbl-r" data-i="${idx}">🔄</button>
-                        <button class="tbl-btn tbl-x" data-i="${idx}">🗑</button>
-                    </td></tr>`;
+                const i = members.indexOf(m);
+                const ed = new Date(m.validityEnd); ed.setHours(0,0,0,0);
+                const isX = ed < now, isE = !isX && ed <= wk;
+                const tag = isX ? '<span class="tag tag-x">EXPIRED</span>' : (isE ? '<span class="tag tag-e">EXPIRING</span>' : '<span class="tag tag-a">ACTIVE</span>');
+                const ph = m.photo ? `<img src="${m.photo}" class="thumb" onclick="zoomPhoto('${m.cardId}')">` : '<span class="no-thumb">👤</span>';
+                return `<tr class="${isX ? 'row-expired' : ''}"><td>${ph}</td><td><code style="color:#c9a84c;">${m.cardId}</code></td><td><strong>${esc(m.name)}</strong></td><td style="color:#c9a84c;">#${m.seatNumber}</td><td><span class="sensitive ${aadharVisible?'show':''}" onclick="this.classList.toggle('show')">${maskAadhar(m.aadharNumber)}</span></td><td>📞 ${esc(m.contactNumber)}</td><td>${m.validityEnd} ${tag}</td><td>${tag}</td><td><button class="tbl-btn tbl-e" data-i="${i}">✏️</button><button class="tbl-btn tbl-d" data-i="${i}">📥</button><button class="tbl-btn tbl-r" data-i="${i}">🔄</button><button class="tbl-btn tbl-x" data-i="${i}">🗑</button></td></tr>`;
             }).join('');
-
             tbody.querySelectorAll('.tbl-e').forEach(b => b.onclick = () => editMember(parseInt(b.dataset.i)));
             tbody.querySelectorAll('.tbl-x').forEach(b => b.onclick = () => delMember(parseInt(b.dataset.i)));
             tbody.querySelectorAll('.tbl-d').forEach(b => b.onclick = () => downloadCard(parseInt(b.dataset.i)));
@@ -745,44 +610,33 @@
         function applyFilter() {
             const q = document.getElementById('searchInput').value.toLowerCase().trim();
             const sf = document.getElementById('filterStatus').value;
-            const now = new Date(); now.setHours(0, 0, 0, 0);
-            const wk = new Date(now); wk.setDate(wk.getDate() + 7);
+            const now = new Date(); now.setHours(0,0,0,0); const wk = new Date(now); wk.setDate(wk.getDate()+7);
             let f = members.filter(m => {
-                if (q && !(m.name.toLowerCase().includes(q) || m.aadharNumber.replace(/\s/g, '').includes(q.replace(/\s/g, '')) || m.contactNumber.includes(q) || m.cardId.toLowerCase().includes(q) || m.seatNumber.toString().includes(q) || (m.address && m.address.toLowerCase().includes(q)))) return false;
-                if (sf) { const ed = new Date(m.validityEnd); ed.setHours(0, 0, 0, 0); if (sf === 'expired' && ed >= now) return false; if (sf === 'active' && ed < now) return false; if (sf === 'expiring' && (ed < now || ed > wk)) return false; }
+                if (q && !(m.name.toLowerCase().includes(q) || m.aadharNumber.includes(q) || m.contactNumber.includes(q) || m.cardId.toLowerCase().includes(q) || m.seatNumber.toString().includes(q))) return false;
+                if (sf) { const ed = new Date(m.validityEnd); ed.setHours(0,0,0,0); if (sf === 'expired' && ed >= now) return false; if (sf === 'active' && ed < now) return false; if (sf === 'expiring' && (ed < now || ed > wk)) return false; }
                 return true;
             });
-            renderTable(f);
-            document.getElementById('tblCount').textContent = f.length;
+            renderTable(f); document.getElementById('tblCount').textContent = f.length;
         }
 
         function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+        function zoomPhoto(cid) { const m = members.find(x => x.cardId === cid); if (!m?.photo) return; document.getElementById('modalBox').innerHTML = `<div class="modal-overlay" onclick="this.remove()"><img src="${m.photo}" style="max-width:92%;max-height:85vh;border-radius:12px;"></div>`; }
 
-        function zoomPhoto(cardId) {
-            const m = members.find(x => x.cardId === cardId);
-            if (!m?.photo) return;
-            document.getElementById('modalBox').innerHTML = `<div class="modal-overlay" onclick="this.remove()"><img src="${m.photo}" style="max-width:92%;max-height:88vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.8);"></div>`;
-        }
-
-        function downloadCard(idx) {
-            const m = members[idx];
-            const canvas = document.createElement('canvas'); canvas.width = 450; canvas.height = 600;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0, 0, 450, 600);
-            ctx.strokeStyle = '#c9a84c'; ctx.lineWidth = 3; ctx.strokeRect(10, 10, 430, 580);
+        function downloadCard(i) {
+            const m = members[i];
+            const c = document.createElement('canvas'); c.width = 450; c.height = 600;
+            const ctx = c.getContext('2d');
+            ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0,0,450,600);
+            ctx.strokeStyle = '#c9a84c'; ctx.lineWidth = 3; ctx.strokeRect(10,10,430,580);
             ctx.fillStyle = '#c9a84c'; ctx.font = 'bold 26px "Playfair Display", serif'; ctx.textAlign = 'center'; ctx.fillText('📚 Bawa Library', 225, 55);
-            ctx.fillStyle = '#f0d878'; ctx.font = 'bold 12px Inter'; ctx.fillText('MEMBERSHIP CARD', 225, 82);
-            function drawRest() {
-                const fields = [{ l: 'Card ID', v: m.cardId }, { l: 'Name', v: m.name }, { l: 'Seat', v: '#' + m.seatNumber }, { l: 'Aadhar', v: m.aadharNumber }, { l: 'Contact', v: m.contactNumber }, { l: 'Valid Until', v: m.validityEnd }];
-                fields.forEach((f, i) => { ctx.fillStyle = '#9a9588'; ctx.font = 'bold 10px Inter'; ctx.fillText(f.l, 225, 275 + i * 38); ctx.fillStyle = '#e8e6e1'; ctx.font = '13px Inter'; ctx.fillText(f.v, 225, 291 + i * 38); });
-                ctx.fillStyle = '#c9a84c'; ctx.font = 'italic 10px Inter'; ctx.fillText('Authorized by Bawa Library', 225, 510);
-                canvas.toBlob(b => { const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `Bawa_Card_${m.cardId}.png`; a.click(); URL.revokeObjectURL(u); toast('Card downloaded!'); }, 'image/png');
+            function dr() {
+                [{l:'Card ID',v:m.cardId},{l:'Name',v:m.name},{l:'Seat',v:'#'+m.seatNumber},{l:'Aadhar',v:m.aadharNumber},{l:'Contact',v:m.contactNumber},{l:'Valid Until',v:m.validityEnd}].forEach((f,i) => { ctx.fillStyle = '#9a9588'; ctx.font = 'bold 10px Inter'; ctx.fillText(f.l,225,275+i*38); ctx.fillStyle = '#e8e6e1'; ctx.font = '13px Inter'; ctx.fillText(f.v,225,291+i*38); });
+                c.toBlob(b => { const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `Bawa_Card_${m.cardId}.png`; a.click(); URL.revokeObjectURL(u); toast('Card downloaded!'); }, 'image/png');
             }
-            if (m.photo) { const img = new Image(); img.onload = () => { ctx.save(); ctx.beginPath(); ctx.arc(225, 190, 55, 0, Math.PI * 2); ctx.clip(); ctx.drawImage(img, 170, 135, 110, 110); ctx.restore(); ctx.strokeStyle = '#c9a84c'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(225, 190, 55, 0, Math.PI * 2); ctx.stroke(); drawRest(); }; img.src = m.photo; }
-            else { ctx.fillStyle = '#333'; ctx.beginPath(); ctx.arc(225, 190, 55, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = '#666'; ctx.font = '45px sans-serif'; ctx.fillText('👤', 225, 208); drawRest(); }
+            if (m.photo) { const img = new Image(); img.onload = () => { ctx.save(); ctx.beginPath(); ctx.arc(225,190,55,0,Math.PI*2); ctx.clip(); ctx.drawImage(img,170,135,110,110); ctx.restore(); ctx.strokeStyle = '#c9a84c'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(225,190,55,0,Math.PI*2); ctx.stroke(); dr(); }; img.src = m.photo; }
+            else { ctx.fillStyle = '#333'; ctx.beginPath(); ctx.arc(225,190,55,0,Math.PI*2); ctx.fill(); ctx.fillStyle = '#666'; ctx.font = '45px sans-serif'; ctx.fillText('👤',225,208); dr(); }
         }
 
-        // ═══════════ CRUD ═══════════
         function addMember() {
             const name = document.getElementById('sName').value.trim();
             const seat = parseInt(document.getElementById('sSeat').value);
@@ -792,25 +646,15 @@
             const end = document.getElementById('sEnd').value;
             const address = document.getElementById('sAddress').value.trim();
             if (!name || !seat || !aadhar || !contact || !start || !end || !address) return toast('Fill all * fields', 'err');
-            if (aadhar.replace(/\s/g, '').length !== 12) return toast('Aadhar must be 12 digits', 'err');
-            if (contact.replace(/\D/g, '').length < 10) return toast('Invalid contact', 'err');
+            if (aadhar.replace(/\s/g,'').length !== 12) return toast('Aadhar: 12 digits', 'err');
+            if (contact.replace(/\D/g,'').length < 10) return toast('Invalid contact', 'err');
             if (new Date(end) <= new Date(start)) return toast('End after start', 'err');
             const ei = parseInt(document.getElementById('editIdx').value);
-            if (ei === -1 && members.find(m => m.seatNumber === seat)) return toast(`Seat ${seat} occupied!`, 'err');
+            if (ei === -1 && members.find(m => m.seatNumber === seat)) return toast(`Seat ${seat} taken!`, 'err');
             let cid = ei >= 0 ? members[ei].cardId : cardId(seat);
             if (ei === -1 && members.find(m => m.cardId === cid)) return toast('Card exists!', 'err');
-            const obj = {
-                cardId: cid, name, seatNumber: seat, aadharNumber: aadhar, contactNumber: contact,
-                validityStart: start, validityEnd: end, address,
-                photo: tempPhoto || (ei >= 0 ? members[ei].photo : null),
-                email: document.getElementById('sEmail').value.trim(),
-                dob: document.getElementById('sDob').value,
-                notes: document.getElementById('sNotes').value.trim(),
-                registeredAt: ei >= 0 ? members[ei].registeredAt : new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            };
-            if (ei >= 0) { members[ei] = obj; toast('Updated!'); }
-            else { members.push(obj); toast(`Registered! ${cid}`); }
+            const obj = { cardId: cid, name, seatNumber: seat, aadharNumber: aadhar, contactNumber: contact, validityStart: start, validityEnd: end, address, photo: tempPhoto || (ei >= 0 ? members[ei].photo : null), email: document.getElementById('sEmail').value.trim(), notes: document.getElementById('sNotes').value.trim(), registeredAt: ei >= 0 ? members[ei].registeredAt : new Date().toISOString(), updatedAt: new Date().toISOString() };
+            if (ei >= 0) { members[ei] = obj; toast('Updated!'); } else { members.push(obj); toast(`Registered! ${cid}`); }
             saveData(); clearForm(); refreshAll();
         }
 
@@ -825,39 +669,26 @@
             document.getElementById('sEnd').value = m.validityEnd;
             document.getElementById('sAddress').value = m.address || '';
             document.getElementById('sEmail').value = m.email || '';
-            document.getElementById('sDob').value = m.dob || '';
             document.getElementById('sNotes').value = m.notes || '';
-            tempPhoto = m.photo || null;
-            updatePhotoPreview();
-            popSeats(m.seatNumber);
-            document.getElementById('sSeat').value = m.seatNumber;
+            tempPhoto = m.photo || null; updatePhotoPreview();
+            popSeats(m.seatNumber); document.getElementById('sSeat').value = m.seatNumber;
             document.getElementById('addBtn').textContent = '💾 Update';
             document.getElementById('cancelBtn').style.display = 'inline-flex';
             document.getElementById('formCard').scrollIntoView({ behavior: 'smooth' });
         }
 
-        function delMember(i) {
-            if (confirm(`Delete ${members[i].name}?`)) { members.splice(i, 1); saveData(); refreshAll(); toast('Deleted.'); }
-        }
+        function delMember(i) { if (confirm(`Delete ${members[i].name}?`)) { members.splice(i,1); saveData(); refreshAll(); toast('Deleted.'); } }
 
         function renewMember(i) {
-            const m = members[i];
-            const box = document.getElementById('modalBox');
+            const m = members[i], box = document.getElementById('modalBox');
             const today = new Date();
-            const newEnd = new Date(Math.max(new Date(m.validityEnd), today));
-            newEnd.setDate(newEnd.getDate() + 30);
-            box.innerHTML = `
-                <div class="modal-overlay" id="rOverlay"><div class="modal">
-                    <h3>🔄 Renew: ${m.name}</h3>
-                    <div style="display:flex;gap:10px;margin:10px 0;"><div class="form-group"><label>Start</label><input type="date" id="rStart" value="${today.toISOString().split('T')[0]}"></div><div class="form-group"><label>End</label><input type="date" id="rEnd" value="${newEnd.toISOString().split('T')[0]}"></div></div>
-                    <div style="display:flex;gap:5px;flex-wrap:wrap;"><button class="btn btn-sm btn-outline" data-d="30">+30D</button><button class="btn btn-sm btn-outline" data-d="90">+90D</button><button class="btn btn-sm btn-outline" data-d="180">+180D</button><button class="btn btn-sm btn-outline" data-d="365">+1Y</button></div>
-                    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px;"><button class="btn btn-outline btn-sm" id="rClose">Cancel</button><button class="btn btn-gold btn-sm" id="rConfirm">✅ Renew</button></div>
-                </div></div>`;
-            document.getElementById('rOverlay').onclick = function(e) { if (e.target === this) box.innerHTML = ''; };
-            document.getElementById('rClose').onclick = () => box.innerHTML = '';
-            document.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { const s = new Date(document.getElementById('rStart').value); const e = new Date(s); e.setDate(e.getDate() + parseInt(b.dataset.d)); document.getElementById('rEnd').value = e.toISOString().split('T')[0]; });
-            document.getElementById('rConfirm').onclick = () => {
-                const s = document.getElementById('rStart').value, e = document.getElementById('rEnd').value;
+            const ne = new Date(Math.max(new Date(m.validityEnd), today)); ne.setDate(ne.getDate()+30);
+            box.innerHTML = `<div class="modal-overlay" id="rO"><div class="modal"><h3>🔄 Renew: ${m.name}</h3><div style="display:flex;gap:10px;margin:10px 0;"><div class="form-group"><label>Start</label><input type="date" id="rS" value="${today.toISOString().split('T')[0]}"></div><div class="form-group"><label>End</label><input type="date" id="rE" value="${ne.toISOString().split('T')[0]}"></div></div><div style="display:flex;gap:5px;"><button class="btn btn-sm btn-outline" data-d="30">+30D</button><button class="btn btn-sm btn-outline" data-d="90">+90D</button><button class="btn btn-sm btn-outline" data-d="180">+180D</button><button class="btn btn-sm btn-outline" data-d="365">+1Y</button></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px;"><button class="btn btn-outline btn-sm" id="rCl">Cancel</button><button class="btn btn-gold btn-sm" id="rCf">✅ Renew</button></div></div></div>`;
+            document.getElementById('rO').onclick = function(e) { if (e.target === this) box.innerHTML = ''; };
+            document.getElementById('rCl').onclick = () => box.innerHTML = '';
+            document.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { const s = new Date(document.getElementById('rS').value); const e = new Date(s); e.setDate(e.getDate()+parseInt(b.dataset.d)); document.getElementById('rE').value = e.toISOString().split('T')[0]; });
+            document.getElementById('rCf').onclick = () => {
+                const s = document.getElementById('rS').value, e = document.getElementById('rE').value;
                 if (!s || !e) return toast('Select dates', 'err');
                 if (new Date(e) <= new Date(s)) return toast('End after start', 'err');
                 members[i].validityStart = s; members[i].validityEnd = e; members[i].updatedAt = new Date().toISOString();
@@ -868,205 +699,108 @@
         function clearForm() {
             document.getElementById('editIdx').value = '-1';
             document.getElementById('formTitle').textContent = '📝 Register New Member';
-            ['sName', 'sAadhar', 'sContact', 'sStart', 'sEnd', 'sAddress', 'sEmail', 'sDob', 'sNotes'].forEach(id => document.getElementById(id).value = '');
+            ['sName','sAadhar','sContact','sStart','sEnd','sAddress','sEmail','sNotes'].forEach(id => document.getElementById(id).value = '');
             tempPhoto = null; updatePhotoPreview();
-            document.getElementById('addBtn').textContent = '✅ Register Member';
+            document.getElementById('addBtn').textContent = '✅ Register';
             document.getElementById('cancelBtn').style.display = 'none';
             popSeats();
         }
 
-        // ═══════════ PHOTO UPLOAD ═══════════
-        document.getElementById('photoArea').addEventListener('click', function(e) {
-            if (e.target !== document.getElementById('photoRemove')) document.getElementById('photoInput').click();
-        });
+        document.getElementById('photoArea').addEventListener('click', function(e) { if (e.target !== document.getElementById('photoRemove')) document.getElementById('photoInput').click(); });
         document.getElementById('photoInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const infoEl = document.getElementById('photoInfo');
-            if (file.size > MAX_PHOTO_SIZE) {
-                infoEl.textContent = `⚠️ File too large! (${(file.size / 1024 / 1024).toFixed(1)}MB). Max 15MB.`;
-                return toast(`Photo too large! Max 15MB. Your file: ${(file.size / 1024 / 1024).toFixed(1)}MB`, 'err');
-            }
-            infoEl.textContent = file.size > 5 * 1024 * 1024 ? `📸 Processing ${(file.size / 1024 / 1024).toFixed(1)}MB image...` : '';
-            const reader = new FileReader();
-            reader.onload = function(ev) {
-                if (file.size > 3 * 1024 * 1024) {
+            const file = e.target.files[0]; if (!file) return;
+            if (file.size > MAX_PHOTO) return toast('Max 15MB', 'err');
+            const r = new FileReader();
+            r.onload = function(ev) {
+                if (file.size > 3*1024*1024) {
                     const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        let w = img.width, h = img.height;
-                        const maxDim = 1200;
-                        if (w > maxDim || h > maxDim) {
-                            if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
-                            else { w = Math.round(w * maxDim / h); h = maxDim; }
-                        }
-                        canvas.width = w; canvas.height = h;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, w, h);
-                        tempPhoto = canvas.toDataURL('image/jpeg', 0.75);
-                        updatePhotoPreview();
-                        const sizeKB = Math.round(tempPhoto.length / 1024);
-                        infoEl.textContent = `✅ Compressed to ${sizeKB}KB (high quality)`;
-                        setTimeout(() => infoEl.textContent = '', 3000);
-                    };
+                    img.onload = function() { const cv = document.createElement('canvas'); let w=img.width, h=img.height; if(w>1200){h=Math.round(h*1200/w);w=1200;} cv.width=w; cv.height=h; cv.getContext('2d').drawImage(img,0,0,w,h); tempPhoto=cv.toDataURL('image/jpeg',0.75); updatePhotoPreview(); };
                     img.src = ev.target.result;
-                } else {
-                    tempPhoto = ev.target.result;
-                    updatePhotoPreview();
-                    infoEl.textContent = '';
-                }
-            };
-            reader.readAsDataURL(file);
+                } else { tempPhoto = ev.target.result; updatePhotoPreview(); }
+            }; r.readAsDataURL(file);
         });
-        document.getElementById('photoRemove').addEventListener('click', function(e) {
-            e.stopPropagation();
-            tempPhoto = null;
-            document.getElementById('photoInput').value = '';
-            document.getElementById('photoInfo').textContent = '';
-            updatePhotoPreview();
-        });
+        document.getElementById('photoRemove').addEventListener('click', function(e) { e.stopPropagation(); tempPhoto = null; document.getElementById('photoInput').value = ''; updatePhotoPreview(); });
 
         function updatePhotoPreview() {
             const prev = document.getElementById('photoPreview'), place = document.getElementById('photoPlace');
             const area = document.getElementById('photoArea'), rm = document.getElementById('photoRemove');
-            if (tempPhoto) {
-                prev.src = tempPhoto; prev.style.display = 'block'; place.style.display = 'none';
-                area.classList.add('has-photo'); rm.style.display = 'flex';
-            } else {
-                prev.src = ''; prev.style.display = 'none'; place.style.display = 'block';
-                area.classList.remove('has-photo'); rm.style.display = 'none';
-            }
+            if (tempPhoto) { prev.src = tempPhoto; prev.style.display = 'block'; place.style.display = 'none'; area.classList.add('has-photo'); rm.style.display = 'flex'; }
+            else { prev.style.display = 'none'; place.style.display = 'block'; area.classList.remove('has-photo'); rm.style.display = 'none'; }
         }
 
-        // ═══════════ ADMIN PANEL ═══════════
         function showAdmin() {
             const box = document.getElementById('modalBox');
-            box.innerHTML = `
-                <div class="modal-overlay" id="admOverlay"><div class="modal">
-                    <h3>⚙️ Admin Panel</h3>
-                    <div style="display:flex;gap:10px;margin:10px 0;"><div class="form-group"><label>Total Seats</label><input type="number" id="newSeats" value="${totalSeats}" min="1" style="font-size:1.1rem;"></div><div class="form-group" style="justify-content:flex-end;"><button class="btn btn-gold btn-sm" id="applySeats" style="margin-top:18px;">Update</button></div></div>
-                    <p style="font-size:0.62rem;color:#f39c12;">⚠️ Decreasing removes members above new limit</p>
-                    <hr style="border-color:rgba(201,168,76,0.08);margin:10px 0;">
-                    <p style="font-weight:700;color:#c9a84c;">🔐 Change PIN</p>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;"><input type="password" id="oldPin" placeholder="Current PIN" maxlength="4" style="flex:1;min-width:100px;"><input type="password" id="newPin" placeholder="New 4-digit" maxlength="4" style="flex:1;min-width:100px;"><input type="password" id="confPin" placeholder="Confirm" maxlength="4" style="flex:1;min-width:100px;"></div>
-                    <button class="btn btn-gold btn-sm" id="savePinBtn" style="margin-top:8px;">💾 Save PIN</button>
-                    <hr style="border-color:rgba(201,168,76,0.08);margin:10px 0;">
-                    <button class="btn btn-red btn-sm" id="factoryReset">💀 Factory Reset</button>
-                    <p style="font-size:0.6rem;color:#9a9588;margin-top:4px;">Resets everything. PIN becomes 1234.</p>
-                    <div style="text-align:right;margin-top:10px;"><button class="btn btn-outline btn-sm" id="admClose">Close</button></div>
-                </div></div>`;
-            document.getElementById('admOverlay').onclick = function(e) { if (e.target === this) box.innerHTML = ''; };
-            document.getElementById('admClose').onclick = () => box.innerHTML = '';
-            document.getElementById('applySeats').onclick = () => {
-                const v = parseInt(document.getElementById('newSeats').value);
-                if (!v || v < 1) return toast('Invalid', 'err');
-                if (v < totalSeats && members.some(m => m.seatNumber > v)) {
-                    if (!confirm(`Members above seat ${v} will be unassigned. Continue?`)) return;
-                    members.forEach(m => { if (m.seatNumber > v) { m.seatNumber = 0; m.cardId = 'BWL-000'; } });
-                }
-                totalSeats = v; saveData(); box.innerHTML = ''; refreshAll(); toast(`Seats: ${v}`);
-            };
-            document.getElementById('savePinBtn').onclick = () => {
-                const o = document.getElementById('oldPin').value, n = document.getElementById('newPin').value, c = document.getElementById('confPin').value;
-                if (o !== adminPIN) return toast('Wrong current PIN', 'err');
-                if (!/^\d{4}$/.test(n)) return toast('PIN must be 4 digits', 'err');
-                if (n !== c) return toast('PINs mismatch', 'err');
-                savePIN(n); box.innerHTML = ''; toast('PIN updated! 🔐');
-            };
-            document.getElementById('factoryReset').onclick = () => {
-                if (confirm('DELETE ALL DATA?') && confirm('FINAL: Everything erased!')) {
-                    members = []; totalSeats = 51; adminPIN = '1234'; aadharVisible = false;
-                    saveData(); savePIN('1234'); clearForm(); refreshAll();
-                    document.getElementById('maskToggle').textContent = '👁️ Aadhar Hidden';
-                    box.innerHTML = ''; toast('Reset complete. PIN: 1234', 'warn');
-                }
-            };
+            box.innerHTML = `<div class="modal-overlay" id="admO"><div class="modal"><h3>⚙️ Admin</h3><div style="display:flex;gap:10px;margin:10px 0;"><div class="form-group"><label>Seats</label><input type="number" id="ns" value="${totalSeats}" min="1"></div><div class="form-group" style="justify-content:flex-end;"><button class="btn btn-gold btn-sm" id="as" style="margin-top:18px;">Update</button></div></div><hr style="border-color:rgba(201,168,76,0.08);margin:10px 0;"><p style="font-weight:700;color:#c9a84c;">🔐 Change PIN</p><div style="display:flex;gap:8px;"><input type="password" id="op" placeholder="Current" maxlength="4" style="flex:1;"><input type="password" id="np" placeholder="New" maxlength="4" style="flex:1;"><input type="password" id="cp" placeholder="Confirm" maxlength="4" style="flex:1;"></div><button class="btn btn-gold btn-sm" id="sp" style="margin-top:8px;">💾 Save</button><hr style="border-color:rgba(201,168,76,0.08);margin:10px 0;"><button class="btn btn-red btn-sm" id="fr">💀 Reset</button><div style="text-align:right;margin-top:10px;"><button class="btn btn-outline btn-sm" id="ac">Close</button></div></div></div>`;
+            document.getElementById('admO').onclick = function(e) { if (e.target === this) box.innerHTML = ''; };
+            document.getElementById('ac').onclick = () => box.innerHTML = '';
+            document.getElementById('as').onclick = () => { const v=parseInt(document.getElementById('ns').value); if(!v||v<1) return toast('Invalid','err'); if(v<totalSeats&&members.some(m=>m.seatNumber>v)){if(!confirm('Unassign?'))return;members.forEach(m=>{if(m.seatNumber>v){m.seatNumber=0;m.cardId='BWL-000';}});} totalSeats=v; saveData(); box.innerHTML=''; refreshAll(); toast(`Seats: ${v}`); };
+            document.getElementById('sp').onclick = () => { const o=document.getElementById('op').value,n=document.getElementById('np').value,c=document.getElementById('cp').value; if(o!==adminPIN) return toast('Wrong PIN','err'); if(!/^\d{4}$/.test(n)) return toast('4 digits','err'); if(n!==c) return toast('Mismatch','err'); savePIN(n); box.innerHTML=''; toast('PIN updated!'); };
+            document.getElementById('fr').onclick = () => { if(confirm('DELETE ALL?')&&confirm('FINAL?')){members=[];totalSeats=51;adminPIN='1234';aadharVisible=false;saveData();savePIN('1234');clearForm();refreshAll();document.getElementById('maskToggle').textContent='👁️ Aadhar Hidden';box.innerHTML='';toast('Reset. PIN: 1234','warn');} };
         }
 
-        // ═══════════ EXPORT / IMPORT / BACKUP ═══════════
         function exportCSV() {
-            if (!members.length) return toast('No data', 'warn');
-            const h = 'Card ID,Name,Seat,Aadhar,Contact,Email,DOB,Valid From,Valid Until,Address,Notes';
-            let csv = h + '\n' + members.map(m => [m.cardId, m.name, m.seatNumber, m.aadharNumber, m.contactNumber, m.email||'', m.dob||'', m.validityStart, m.validityEnd, m.address||'', m.notes||''].map(c => `"${(c||'').replace(/"/g, '""')}"`).join(',')).join('\n');
-            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv' });
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Bawa_Export_${new Date().toISOString().slice(0,10)}.csv`; a.click();
-            toast('Exported!');
+            if (!members.length) return toast('No data','warn');
+            const h='Card ID,Name,Seat,Aadhar,Contact,Email,Valid From,Valid Until,Address,Notes';
+            let csv=h+'\n'+members.map(m=>[m.cardId,m.name,m.seatNumber,m.aadharNumber,m.contactNumber,m.email||'',m.validityStart,m.validityEnd,m.address||'',m.notes||''].map(c=>`"${(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+            const b=new Blob(['\uFEFF'+csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`Bawa_Export_${new Date().toISOString().slice(0,10)}.csv`; a.click(); toast('Exported!');
         }
 
         function backupJSON() {
-            if (!members.length) return toast('No data', 'warn');
-            const blob = new Blob([JSON.stringify({ version: '8.0', library: 'Bawa Library', totalSeats, members }, null, 2)], { type: 'application/json' });
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Bawa_Backup_${new Date().toISOString().slice(0,10)}.json`; a.click();
-            toast('Backup saved! 💾');
+            if (!members.length) return toast('No data','warn');
+            const b=new Blob([JSON.stringify({version:'PWA',library:'Bawa Library',totalSeats,members},null,2)],{type:'application/json'});
+            const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`Bawa_Backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); toast('Backup saved!');
         }
 
         function importData() {
-            const box = document.getElementById('modalBox');
-            box.innerHTML = `
-                <div class="modal-overlay" id="impOverlay"><div class="modal">
-                    <h3>📥 Import Data</h3><p style="font-size:0.68rem;color:#9a9588;">Select .json (backup) or .csv (export)</p>
-                    <input type="file" id="impFile" accept=".json,.csv" style="margin:8px 0;width:100%;">
-                    <div style="text-align:right;"><button class="btn btn-outline btn-sm" id="impClose">Cancel</button></div>
-                </div></div>`;
-            document.getElementById('impOverlay').onclick = function(e) { if (e.target === this) box.innerHTML = ''; };
-            document.getElementById('impClose').onclick = () => box.innerHTML = '';
-            document.getElementById('impFile').onchange = function(e) {
-                const f = e.target.files[0]; if (!f) return;
-                const r = new FileReader();
-                r.onload = function(ev) {
-                    try {
-                        let imported = [];
-                        if (f.name.endsWith('.json')) { const d = JSON.parse(ev.target.result); if (d.members) { if (d.totalSeats) totalSeats = d.totalSeats; imported = d.members; } }
-                        else { const lines = ev.target.result.split('\n'); for (let i = 1; i < lines.length; i++) { if (!lines[i].trim()) continue; const v = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g); if (!v || v.length < 8) continue; imported.push({ cardId: v[0].replace(/"/g,''), name: v[1].replace(/"/g,''), seatNumber: parseInt(v[2]), aadharNumber: v[3].replace(/"/g,''), contactNumber: v[4].replace(/"/g,''), email: v[5]?.replace(/"/g,'')||'', dob: v[6]?.replace(/"/g,'')||'', validityStart: v[7].replace(/"/g,''), validityEnd: v[8].replace(/"/g,''), address: v[9]?.replace(/"/g,'')||'', notes: v[10]?.replace(/"/g,'')||'', photo: null, registeredAt: new Date().toISOString(), updatedAt: new Date().toISOString() }); } }
-                        let added = 0, updated = 0;
-                        imported.forEach(x => { if (!x.name || !x.seatNumber) return; x.seatNumber = parseInt(x.seatNumber); if (!x.cardId) x.cardId = cardId(x.seatNumber); const ei = members.findIndex(m => m.cardId === x.cardId); if (ei >= 0) { members[ei] = { ...members[ei], ...x, updatedAt: new Date().toISOString() }; updated++; } else { members.push(x); added++; } });
-                        saveData(); refreshAll(); box.innerHTML = '';
-                        toast(`Added: ${added} | Updated: ${updated}`);
-                    } catch (err) { toast('Invalid file', 'err'); }
-                };
-                r.readAsText(f);
+            const box=document.getElementById('modalBox');
+            box.innerHTML=`<div class="modal-overlay" id="io"><div class="modal"><h3>📥 Import</h3><input type="file" id="if" accept=".json,.csv" style="margin:8px 0;width:100%;"><button class="btn btn-outline btn-sm" id="ic" style="float:right;">Cancel</button></div></div>`;
+            document.getElementById('io').onclick=function(e){if(e.target===this)box.innerHTML='';};
+            document.getElementById('ic').onclick=()=>box.innerHTML='';
+            document.getElementById('if').onchange=function(e){
+                const f=e.target.files[0];if(!f)return;
+                const r=new FileReader();
+                r.onload=function(ev){
+                    try{
+                        let imp=[];
+                        if(f.name.endsWith('.json')){const d=JSON.parse(ev.target.result);if(d.members){if(d.totalSeats)totalSeats=d.totalSeats;imp=d.members;}}
+                        else{const lines=ev.target.result.split('\n');for(let i=1;i<lines.length;i++){if(!lines[i].trim())continue;const v=lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);if(!v||v.length<8)continue;imp.push({cardId:v[0].replace(/"/g,''),name:v[1].replace(/"/g,''),seatNumber:parseInt(v[2]),aadharNumber:v[3].replace(/"/g,''),contactNumber:v[4].replace(/"/g,''),email:v[5]?.replace(/"/g,'')||'',validityStart:v[7].replace(/"/g,''),validityEnd:v[8].replace(/"/g,''),address:v[9]?.replace(/"/g,'')||'',notes:v[10]?.replace(/"/g,'')||'',photo:null,registeredAt:new Date().toISOString(),updatedAt:new Date().toISOString()});}}
+                        let ad=0,up=0;
+                        imp.forEach(x=>{if(!x.name||!x.seatNumber)return;x.seatNumber=parseInt(x.seatNumber);if(!x.cardId)x.cardId=cardId(x.seatNumber);const ei=members.findIndex(m=>m.cardId===x.cardId);if(ei>=0){members[ei]={...members[ei],...x,updatedAt:new Date().toISOString()};up++;}else{members.push(x);ad++;}});
+                        saveData();refreshAll();box.innerHTML='';toast(`Added:${ad}|Updated:${up}`);
+                    }catch(err){toast('Invalid file','err');}
+                };r.readAsText(f);
             };
         }
 
-        // ═══════════ EVENT LISTENERS ═══════════
-        document.getElementById('addBtn').onclick = addMember;
-        document.getElementById('cancelBtn').onclick = clearForm;
-        document.getElementById('clearBtn').onclick = clearForm;
-        document.getElementById('sAadhar').oninput = function() { let v = this.value.replace(/\D/g, '').slice(0, 12); this.value = v.replace(/(\d{4})(?=\d)/g, '$1 '); };
-        document.getElementById('searchInput').oninput = applyFilter;
-        document.getElementById('filterStatus').onchange = applyFilter;
-        document.getElementById('clearFilter').onclick = () => { document.getElementById('searchInput').value = ''; document.getElementById('filterStatus').value = ''; applyFilter(); };
-        document.getElementById('themeToggle').onclick = () => { darkTheme = !darkTheme; document.body.classList.toggle('light-theme', !darkTheme); saveData(); };
-        document.getElementById('maskToggle').onclick = function() { aadharVisible = !aadharVisible; this.textContent = aadharVisible ? '🙈 Hide Aadhar' : '👁️ Aadhar Hidden'; renderTable(); };
-        document.getElementById('adminBtn').onclick = showAdmin;
-        document.getElementById('lockBtn').onclick = () => { lockApp(); toast('System locked'); };
-        document.getElementById('exportBtn').onclick = exportCSV;
-        document.getElementById('backupBtn').onclick = backupJSON;
-        document.getElementById('importBtn').onclick = importData;
+        // Event Bindings
+        document.getElementById('addBtn').onclick=addMember;
+        document.getElementById('cancelBtn').onclick=clearForm;
+        document.getElementById('clearBtn').onclick=clearForm;
+        document.getElementById('sAadhar').oninput=function(){let v=this.value.replace(/\D/g,'').slice(0,12);this.value=v.replace(/(\d{4})(?=\d)/g,'$1 ');};
+        document.getElementById('searchInput').oninput=applyFilter;
+        document.getElementById('filterStatus').onchange=applyFilter;
+        document.getElementById('clearFilter').onclick=()=>{document.getElementById('searchInput').value='';document.getElementById('filterStatus').value='';applyFilter();};
+        document.getElementById('themeToggle').onclick=()=>{darkTheme=!darkTheme;document.body.classList.toggle('light-theme',!darkTheme);saveData();};
+        document.getElementById('maskToggle').onclick=function(){aadharVisible=!aadharVisible;this.textContent=aadharVisible?'🙈 Hide':'👁️ Aadhar Hidden';renderTable();};
+        document.getElementById('adminBtn').onclick=showAdmin;
+        document.getElementById('lockBtn').onclick=()=>{lockApp();toast('Locked');};
+        document.getElementById('exportBtn').onclick=exportCSV;
+        document.getElementById('backupBtn').onclick=backupJSON;
+        document.getElementById('importBtn').onclick=importData;
 
-        // Quick Actions
-        document.getElementById('qReg').onclick = () => { clearForm(); document.getElementById('formCard').scrollIntoView({ behavior: 'smooth' }); document.getElementById('sName').focus(); };
-        document.getElementById('qExp').onclick = () => { document.getElementById('filterStatus').value = 'expiring'; document.getElementById('searchInput').value = ''; applyFilter(); };
-        document.getElementById('qExd').onclick = () => { document.getElementById('filterStatus').value = 'expired'; document.getElementById('searchInput').value = ''; applyFilter(); };
-        document.getElementById('qVac').onclick = () => {
-            const taken = members.map(m => m.seatNumber);
-            const box = document.getElementById('modalBox');
-            let html = '<div class="modal-overlay" id="vO"><div class="modal"><h3>🪑 Seat Map</h3><div class="seat-grid">';
-            for (let i = 1; i <= totalSeats; i++) html += `<div class="seat-box ${taken.includes(i) ? 'seat-taken' : 'seat-free'}">${taken.includes(i) ? '🔴' : '🟢'} ${i}</div>`;
-            html += `</div><p style="margin-top:8px;font-size:0.7rem;"><span style="color:#2ecc71;">🟢 Vacant: ${totalSeats - members.length}</span> | <span style="color:#e74c3c;">🔴 Occupied: ${members.length}</span></p><button class="btn btn-outline btn-sm" id="vCl">Close</button></div></div>`;
-            box.innerHTML = html;
-            document.getElementById('vO').onclick = function(e) { if (e.target === this) box.innerHTML = ''; };
-            document.getElementById('vCl').onclick = () => box.innerHTML = '';
+        document.getElementById('qReg').onclick=()=>{clearForm();document.getElementById('formCard').scrollIntoView({behavior:'smooth'});document.getElementById('sName').focus();};
+        document.getElementById('qExp').onclick=()=>{document.getElementById('filterStatus').value='expiring';document.getElementById('searchInput').value='';applyFilter();};
+        document.getElementById('qExd').onclick=()=>{document.getElementById('filterStatus').value='expired';document.getElementById('searchInput').value='';applyFilter();};
+        document.getElementById('qVac').onclick=()=>{
+            const taken=members.map(m=>m.seatNumber),box=document.getElementById('modalBox');
+            let h='<div class="modal-overlay" id="vO"><div class="modal"><h3>🪑 Seats</h3><div class="seat-grid">';
+            for(let i=1;i<=totalSeats;i++)h+=`<div class="seat-box ${taken.includes(i)?'seat-taken':'seat-free'}">${taken.includes(i)?'🔴':'🟢'}${i}</div>`;
+            h+=`</div><p style="margin-top:8px;"><span style="color:#2ecc71;">🟢${totalSeats-members.length}</span>|<span style="color:#e74c3c;">🔴${members.length}</span></p><button class="btn btn-outline btn-sm" id="vCl">Close</button></div></div>`;
+            box.innerHTML=h;
+            document.getElementById('vO').onclick=function(e){if(e.target===this)box.innerHTML='';};
+            document.getElementById('vCl').onclick=()=>box.innerHTML='';
         };
-        document.getElementById('qAll').onclick = () => { document.getElementById('filterStatus').value = ''; document.getElementById('searchInput').value = ''; applyFilter(); };
-
-        // Sorting
-        document.querySelectorAll('th[data-sort]').forEach(th => {
-            th.onclick = () => { const f = th.dataset.sort; currentSort = { field: f, asc: currentSort.field === f ? !currentSort.asc : true }; renderTable(null, currentSort.field, currentSort.asc); };
-        });
-
-        // Ctrl+S
-        document.addEventListener('keydown', e => { if (e.ctrlKey && e.key === 's' && !isLocked) { e.preventDefault(); addMember(); } });
+        document.getElementById('qAll').onclick=()=>{document.getElementById('filterStatus').value='';document.getElementById('searchInput').value='';applyFilter();};
 
         // Init
         loadData();
